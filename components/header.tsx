@@ -16,10 +16,6 @@ export function Header() {
       <Link className="wordmark" href="/" aria-label="Promise Okafor, home" onClick={() => setOpen(false)}>
         P/O<span>®</span>
       </Link>
-      <div className="header-status">
-        <span className="status-pulse" />
-        Available for select roles
-      </div>
       <button
         className="menu-toggle"
         type="button"
