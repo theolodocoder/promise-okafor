@@ -7,18 +7,6 @@
   overflow: hidden;
 }
 
-.hero-kicker {
-  display: flex;
-  justify-content: space-between;
-  padding-bottom: 0.9rem;
-  border-bottom: 1px solid var(--line);
-  color: var(--muted);
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
 .hero-title {
   margin: auto 0;
   font-family: var(--serif);
@@ -508,10 +496,6 @@
     min-height: 780px;
     padding-top: 7.5rem;
     padding-bottom: 1.5rem;
-  }
-
-  .hero-kicker span:last-child {
-    display: none;
   }
 
   .hero-title {

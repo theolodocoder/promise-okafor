@@ -9,11 +9,6 @@ export function Home() {
       <Header />
       <main>
         <section className="hero" aria-labelledby="hero-title">
-          <div className="hero-kicker" data-hero-fade>
-            <span>Frontend engineering · Web · Mobile · Desktop</span>
-            <span>Ibadan, Nigeria · Working globally</span>
-          </div>
-
           <h1 id="hero-title" className="hero-title">
             <span className="line-mask"><span data-hero-line>I build frontends</span></span>
             <span className="line-mask hero-indent"><span data-hero-line>that move</span></span>
