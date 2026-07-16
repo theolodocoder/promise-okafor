@@ -18,8 +18,33 @@ export type Project = {
 
 export const projects: Project[] = [
   {
-    slug: "paje",
+    slug: "cosella",
     index: "01",
+    title: "Cosella",
+    category: "Cross-platform AI Product",
+    year: "2026",
+    summary:
+      "A realtime AI sales copilot that turns company playbooks into useful, in-call guidance for B2B sales teams.",
+    thesis:
+      "A multi-surface frontend platform spanning an Electron desktop companion, React operations tools, Astro marketing and documentation, and shared typed foundations.",
+    role: "Frontend architecture & product engineering · Lightforth",
+    tags: ["Electron", "React", "TypeScript", "Realtime UX", "Turborepo", "Design Systems"],
+    metrics: [
+      { value: "5", label: "frontend surfaces" },
+      { value: "8+", label: "shared platform packages" },
+      { value: "RT", label: "in-call guidance" },
+    ],
+    challenge:
+      "Live sales conversations leave no room for slow, distracting software. The product needed to surface relevant guidance in the flow of a call while keeping public, operational and desktop experiences coherent as the platform grew.",
+    system:
+      "A modular monorepo gives each surface a focused role: Electron powers the live desktop companion, React supports operational products, and Astro serves public and documentation experiences. Shared design tokens, components, domain contracts and a typed realtime layer keep the system consistent without coupling the apps together.",
+    outcome:
+      "An evolving frontend foundation that supports a focused live-call experience across desktop and web, while giving the team clear boundaries, reusable systems and room to ship each surface independently.",
+    tone: "olive",
+  },
+  {
+    slug: "paje",
+    index: "02",
     title: "Paje",
     category: "Framework Engineering",
     year: "2024",
@@ -45,7 +70,7 @@ export const projects: Project[] = [
   },
   {
     slug: "triggr-cloud",
-    index: "02",
+    index: "03",
     title: "Triggr Cloud",
     category: "Realtime Developer Tooling",
     year: "2024",
@@ -68,31 +93,6 @@ export const projects: Project[] = [
       "A production-minded developer console that makes an event-driven backend observable and actionable from project creation through trigger execution.",
     github: "https://github.com/algorealmInc/Triggr",
     tone: "plum",
-  },
-  {
-    slug: "flowscreen",
-    index: "03",
-    title: "Flowscreen",
-    category: "Product Architecture",
-    year: "2026",
-    summary:
-      "A multi-surface product ecosystem for browsing, organizing and operating a curated library of interface references.",
-    thesis:
-      "A Turborepo architecture connecting a Next.js product, React admin, documentation and a shared typed design system.",
-    role: "Frontend architecture & product UI",
-    tags: ["Next.js", "React 19", "Turborepo", "Design System", "TypeScript"],
-    metrics: [
-      { value: "3", label: "application surfaces" },
-      { value: "19", label: "shared components" },
-      { value: "1", label: "design language" },
-    ],
-    challenge:
-      "A content-heavy product with public, authenticated and administrative experiences needed to scale without each surface inventing its own patterns.",
-    system:
-      "A monorepo shares UI, TypeScript, linting and Tailwind configuration across apps. Feature-oriented modules isolate auth, billing, discovery, settings and content-management concerns.",
-    outcome:
-      "A maintainable product foundation with consistent theming, reusable primitives and clear boundaries between platform-level and feature-level code.",
-    tone: "olive",
   },
   {
     slug: "resume-parser",

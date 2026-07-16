@@ -43,18 +43,35 @@ export function ProjectVisual({ project, compact = false }: { project: Project; 
         </div>
       )}
 
-      {project.slug === "flowscreen" && (
-        <div className="flowscreen-ui" data-drift>
-          <div className="flow-head">
-            <b>flowscreen</b>
-            <span>Browse / Mobile / Web</span>
+      {project.slug === "cosella" && (
+        <div className="cosella-ui" data-drift>
+          <div className="cosella-window">
+            <div className="cosella-titlebar">
+              <span className="window-controls"><i /><i /><i /></span>
+              <b>Cosella · Call copilot</b>
+              <span className="live-pill"><i /> Live</span>
+            </div>
+            <div className="cosella-workspace">
+              <aside className="call-transcript">
+                <div className="cosella-section-label"><span>Conversation</span><b>00:18:42</b></div>
+                <div className="transcript-turn"><i>R</i><p><b>Representative</b><span>Let me show you how the workflow fits your team.</span></p></div>
+                <div className="transcript-turn prospect"><i>P</i><p><b>Prospect</b><span>We already have a process in place.</span></p></div>
+                <div className="transcript-wave"><i /><i /><i /><i /><i /><i /><i /><i /></div>
+              </aside>
+              <section className="copilot-panel">
+                <div className="cosella-section-label"><span>Live guidance</span><b>Playbook</b></div>
+                <div className="guidance-card">
+                  <span className="signal-label"><i /> Objection detected</span>
+                  <h3>Meet them where they are.</h3>
+                  <p>Acknowledge the current process, then explore what the team would improve first.</p>
+                  <div className="suggestion-line"><span>Suggested response</span><i /></div>
+                  <div className="suggestion-copy"><i /><i /><i /></div>
+                </div>
+                <div className="copilot-status"><span><i /> Listening</span><b>Guidance ready</b></div>
+              </section>
+            </div>
           </div>
-          <div className="flow-grid">
-            <div className="flow-shot one"><i /><span>Discovery</span></div>
-            <div className="flow-shot two"><i /><span>Collections</span></div>
-            <div className="flow-shot three"><i /><span>Details</span></div>
-            <div className="flow-shot four"><i /><span>Reference</span></div>
-          </div>
+          <div className="cosella-float"><i /> Realtime context, without breaking the conversation.</div>
         </div>
       )}
 
