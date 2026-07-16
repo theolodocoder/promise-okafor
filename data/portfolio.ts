@@ -148,40 +148,52 @@ export const experience = [
     stack: ["React", "Electron", "React Native", "Realtime systems", "Design systems"],
   },
   {
-    period: "2025",
-    company: "GadaHere Technologies",
-    role: "Frontend Engineer",
+    period: "2024 — NOW",
+    company: "Solace Imaging",
+    role: "Frontend Developer",
     summary:
-      "Engineered a typed Next.js social product spanning discovery, profiles, wallets, saved items, onboarding and live messaging.",
+      "Improving the speed and usability of a production medical-imaging platform where dependable access to complex visual data matters.",
     impact: [
-      "Built the realtime chat layer around Socket.IO providers, typed services and focused state stores, with connection-aware UI and resilient loading and error boundaries.",
-      "Created a tokenized interface system and reusable layout, navigation, form, feedback and data-display primitives for consistent delivery across the application.",
+      "Implemented lazy loading, image optimization and code splitting to reduce the cost of media-heavy product experiences and improve perceived load time.",
+      "Built REST-backed data workflows and translated cross-functional design reviews into responsive, production-ready interfaces.",
     ],
-    stack: ["Next.js", "Socket.IO", "TypeScript", "Zustand", "Design tokens"],
+    stack: ["React", "REST APIs", "Performance", "Medical imaging"],
   },
   {
-    period: "2025",
-    company: "Assandia",
-    role: "Product Frontend Engineer",
+    period: "2023 — NOW",
+    company: "Carbon Businesses / Vella Finance",
+    role: "Frontend Developer",
     summary:
-      "Built a high-touch commerce experience from product discovery through cart, checkout and order confirmation.",
+      "Shipping customer-facing savings products and financial analytics for a fintech platform with multiple investment journeys.",
     impact: [
-      "Modelled reusable product cards, media galleries, specifications and detail flows around the App Router rather than coupling commerce logic to pages.",
-      "Established accessible form, overlay, navigation and feedback primitives with explicit loading, empty and error states for a dependable storefront experience.",
+      "Integrated the Flex, Fixed and Target Savings experiences with backend services, shaping complex financial state into understandable product flows.",
+      "Built interactive D3.js and Chart.js dashboards, then used usability testing and WCAG audits to improve comprehension and reduce friction.",
     ],
-    stack: ["Next.js", "React Query", "TypeScript", "Commerce UX"],
+    stack: ["React", "D3.js", "Chart.js", "Fintech", "Accessibility"],
   },
   {
-    period: "2024",
-    company: "Beetle",
-    role: "Frontend Engineer",
+    period: "2022 — 2024",
+    company: "MaiTech Studios",
+    role: "Frontend Developer",
     summary:
-      "Migrated Spotlight’s discovery and multi-store experience to a modern Next.js architecture for faster product iteration.",
+      "Architected and delivered a full-scale commerce frontend with responsive behavior across device classes and complex asynchronous journeys.",
     impact: [
-      "Designed dynamic storefront and shared-product routes, with product media, discovery, social sharing and store-specific presentation composed from reusable modules.",
-      "Added explicit loading, empty, unavailable-store and error experiences so the customer journey remained intentional beyond the happy path.",
+      "Designed flexible grid and CSS architecture, keeping dense storefront interfaces maintainable across breakpoints and product states.",
+      "Implemented Redux middleware and selectors for data fetching and form submission, integrating REST workflows backed by Prisma services.",
     ],
-    stack: ["Next.js", "React Query", "App Router", "Multi-store commerce"],
+    stack: ["React", "Redux", "REST APIs", "Prisma", "Commerce"],
+  },
+  {
+    period: "2020 — 2022",
+    company: "Odigital Agency",
+    role: "Frontend Lead · Promoted from intern",
+    summary:
+      "Progressed from intern to frontend lead, owning delivery across multiple client products while mentoring junior developers.",
+    impact: [
+      "Designed the Agofure logistics interface, contributing to a reported 25% improvement in customer satisfaction.",
+      "Reduced the overall bug count by 20% through stronger QA and testing workflows, while improving the agency site’s accessibility and performance.",
+    ],
+    stack: ["Frontend leadership", "Logistics", "Testing", "Mentorship"],
   },
 ] as const;
 
