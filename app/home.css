@@ -302,7 +302,7 @@
 
 .experience-item {
   display: grid;
-  grid-template-columns: 0.65fr 1.15fr 1.7fr auto;
+  grid-template-columns: 0.55fr 1fr 2fr auto;
   gap: 2rem;
   align-items: start;
   padding: 2.2rem 0;
@@ -331,11 +331,59 @@
 }
 
 .experience-detail {
+  max-width: 720px;
+}
+
+.experience-detail > p {
   margin: 0;
-  max-width: 620px;
+  color: var(--ink);
+  font-size: 0.86rem;
+  font-weight: 600;
+  line-height: 1.55;
+}
+
+.experience-detail ul {
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.experience-detail li {
+  position: relative;
+  margin-top: 0.65rem;
+  padding-left: 1rem;
   color: var(--muted);
-  font-size: 0.8rem;
+  font-size: 0.76rem;
   line-height: 1.65;
+}
+
+.experience-detail li::before {
+  content: "";
+  position: absolute;
+  top: 0.68em;
+  left: 0;
+  width: 4px;
+  height: 4px;
+  background: var(--ember);
+  border-radius: 50%;
+}
+
+.experience-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 1.15rem;
+}
+
+.experience-stack span {
+  padding: 0.42rem 0.58rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 0.54rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
 }
 
 .experience-plus {

@@ -97,7 +97,7 @@ export function Home() {
         <section className="experience section-shell" id="experience">
           <div className="section-heading compact" data-reveal>
             <p><span>03</span> EXPERIENCE</p>
-            <h2>Built in the work.</h2>
+            <h2>Systems, not slogans.</h2>
             <a className="text-link" href="mailto:goforprodev@gmail.com?subject=Requesting%20Promise%20Okafor%27s%20current%20resume">
               Request current résumé <span aria-hidden="true">↗</span>
             </a>
@@ -111,7 +111,15 @@ export function Home() {
                   <h3>{item.company}</h3>
                   <p className="experience-role">{item.role}</p>
                 </div>
-                <p className="experience-detail">{item.detail}</p>
+                <div className="experience-detail">
+                  <p>{item.summary}</p>
+                  <ul>
+                    {item.impact.map((point) => <li key={point}>{point}</li>)}
+                  </ul>
+                  <div className="experience-stack" aria-label={`${item.company} technologies and focus areas`}>
+                    {item.stack.map((technology) => <span key={technology}>{technology}</span>)}
+                  </div>
+                </div>
                 <span className="experience-plus" aria-hidden="true">+</span>
               </article>
             ))}

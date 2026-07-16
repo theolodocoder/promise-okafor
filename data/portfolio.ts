@@ -127,43 +127,61 @@ export const experience = [
     period: "CURRENT",
     company: "Zabira",
     role: "Senior Frontend Engineer",
-    detail:
-      "Building and evolving Angular product interfaces, with a focus on scalable frontend architecture, reusable UI patterns and dependable delivery across complex product workflows.",
-  },
-  {
-    period: "2025 — NOW",
-    company: "Lightforth",
-    role: "Frontend Lead",
-    detail:
-      "Leading frontend delivery for a job-seeking and interview-prep platform; built the shared component system, mentored engineers and cut initial load time by 40% through code splitting and caching.",
-  },
-  {
-    period: "2024 — 2025",
-    company: "Lightforth",
-    role: "Founding Frontend Engineer",
-    detail:
-      "Architected the first React and Next.js platform, built core product flows and established CI/CD, Git and Docker workflows for the team.",
+    summary:
+      "Leading frontend delivery across the customer platform, operations back office and a ground-up Angular 21 product architecture.",
+    impact: [
+      "Structured the v3 application around domain modules, shared UI, centralized state and reusable platform services spanning wallet, crypto, KYC, rewards, virtual cards and transactions.",
+      "Shipped secure withdrawal journeys with network and fee selection, OTP confirmation and receipts, plus multilevel back-office approval, device registration and operational exports.",
+    ],
+    stack: ["Angular 21", "RxJS", "Domain architecture", "Fintech workflows"],
   },
   {
     period: "2024 — NOW",
-    company: "Solace Imaging",
-    role: "Frontend Developer",
-    detail:
-      "Improving performance and UX for medical imaging workflows through lazy loading, image optimization, code splitting and reliable API integration.",
+    company: "Lightforth",
+    role: "Frontend Lead / Founding Frontend Engineer",
+    summary:
+      "Owning frontend architecture across the core career platform and its web, mobile, browser-extension, B2B and desktop surfaces—including Cosella.",
+    impact: [
+      "Designed fault-tolerant realtime interview and sales sessions with WebSocket prewarming, heartbeats, exponential backoff, reconnection UI and audio-stream recovery across Windows and macOS.",
+      "Built product systems spanning resume editing, interview prep, admin, team, billing and knowledge tools, Electron copilots and shared typed foundations so multiple surfaces can evolve coherently.",
+    ],
+    stack: ["React", "Electron", "React Native", "Realtime systems", "Design systems"],
   },
   {
-    period: "2023 — NOW",
-    company: "Carbon Businesses / Vella",
-    role: "Frontend Developer",
-    detail:
-      "Shipping savings products and financial analytics with D3.js and Chart.js, supported by usability testing and accessibility audits.",
+    period: "2025",
+    company: "GadaHere Technologies",
+    role: "Frontend Engineer",
+    summary:
+      "Engineered a typed Next.js social product spanning discovery, profiles, wallets, saved items, onboarding and live messaging.",
+    impact: [
+      "Built the realtime chat layer around Socket.IO providers, typed services and focused state stores, with connection-aware UI and resilient loading and error boundaries.",
+      "Created a tokenized interface system and reusable layout, navigation, form, feedback and data-display primitives for consistent delivery across the application.",
+    ],
+    stack: ["Next.js", "Socket.IO", "TypeScript", "Zustand", "Design tokens"],
   },
   {
-    period: "2020 — 2024",
-    company: "Odigital + MaiTech",
-    role: "Frontend Lead / Developer",
-    detail:
-      "Progressed from intern to frontend lead, mentored junior engineers and delivered responsive commerce and logistics experiences across agencies and product teams.",
+    period: "2025",
+    company: "Assandia",
+    role: "Product Frontend Engineer",
+    summary:
+      "Built a high-touch commerce experience from product discovery through cart, checkout and order confirmation.",
+    impact: [
+      "Modelled reusable product cards, media galleries, specifications and detail flows around the App Router rather than coupling commerce logic to pages.",
+      "Established accessible form, overlay, navigation and feedback primitives with explicit loading, empty and error states for a dependable storefront experience.",
+    ],
+    stack: ["Next.js", "React Query", "TypeScript", "Commerce UX"],
+  },
+  {
+    period: "2024",
+    company: "Beetle",
+    role: "Frontend Engineer",
+    summary:
+      "Migrated Spotlight’s discovery and multi-store experience to a modern Next.js architecture for faster product iteration.",
+    impact: [
+      "Designed dynamic storefront and shared-product routes, with product media, discovery, social sharing and store-specific presentation composed from reusable modules.",
+      "Added explicit loading, empty, unavailable-store and error experiences so the customer journey remained intentional beyond the happy path.",
+    ],
+    stack: ["Next.js", "React Query", "App Router", "Multi-store commerce"],
   },
 ] as const;
 
