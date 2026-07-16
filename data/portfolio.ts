@@ -124,6 +124,13 @@ export const projects: Project[] = [
 
 export const experience = [
   {
+    period: "CURRENT",
+    company: "Zabira",
+    role: "Senior Frontend Engineer",
+    detail:
+      "Building and evolving Angular product interfaces, with a focus on scalable frontend architecture, reusable UI patterns and dependable delivery across complex product workflows.",
+  },
+  {
     period: "2025 — NOW",
     company: "Lightforth",
     role: "Frontend Lead",

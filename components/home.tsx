@@ -10,7 +10,7 @@ export function Home() {
       <main>
         <section className="hero" aria-labelledby="hero-title">
           <div className="hero-kicker" data-hero-fade>
-            <span>Senior frontend engineer</span>
+            <span>Frontend engineering · Web · Mobile · Desktop</span>
             <span>Ibadan, Nigeria · Working globally</span>
           </div>
 
@@ -23,12 +23,12 @@ export function Home() {
           <div className="hero-bottom">
             <div className="hero-role-card" data-hero-fade>
               <span className="mini-label">CURRENTLY</span>
-              <p>Frontend Lead at Lightforth</p>
-              <span>5+ years across product, platform and people leadership.</span>
+              <p>Senior Frontend Engineer at Zabira</p>
+              <span>Angular product engineering, alongside frontend leadership at Lightforth.</span>
             </div>
             <p className="hero-intro" data-hero-fade>
-              I’m Promise Okafor. I turn ambitious product ideas into accessible,
-              high-performance systems that teams can evolve with confidence.
+              I’m Promise Okafor. I design and ship accessible, high-performance
+              frontend systems across web, mobile and desktop.
             </p>
             <a className="round-link" href="#work" aria-label="Explore selected work" data-hero-fade>
               <span>Explore work</span>
@@ -38,8 +38,8 @@ export function Home() {
 
           <div className="hero-marquee" aria-hidden="true">
             <div>
-              REACT · NEXT.JS · TYPESCRIPT · DESIGN SYSTEMS · PERFORMANCE · ACCESSIBILITY ·
-              REACT · NEXT.JS · TYPESCRIPT · DESIGN SYSTEMS · PERFORMANCE · ACCESSIBILITY ·
+              ANGULAR · REACT · NEXT.JS · REACT NATIVE · TYPESCRIPT · WEB · MOBILE · DESKTOP ·
+              ANGULAR · REACT · NEXT.JS · REACT NATIVE · TYPESCRIPT · WEB · MOBILE · DESKTOP ·
             </div>
           </div>
         </section>
@@ -103,8 +103,8 @@ export function Home() {
           <div className="section-heading compact" data-reveal>
             <p><span>03</span> EXPERIENCE</p>
             <h2>Built in the work.</h2>
-            <a className="text-link" href="/promise-okafor-resume.pdf" target="_blank" rel="noreferrer">
-              Full résumé <span aria-hidden="true">↗</span>
+            <a className="text-link" href="mailto:goforprodev@gmail.com?subject=Requesting%20Promise%20Okafor%27s%20current%20resume">
+              Request current résumé <span aria-hidden="true">↗</span>
             </a>
           </div>
 
@@ -128,8 +128,8 @@ export function Home() {
           <div className="capability-grid">
             <article data-reveal>
               <span>01</span>
-              <h3>Architecture</h3>
-              <p>Frontend platforms, application boundaries, state models, API layers and migration strategy.</p>
+              <h3>Cross-platform</h3>
+              <p>Angular and React web platforms, React Native mobile products, desktop experiences and the shared systems behind them.</p>
             </article>
             <article data-reveal>
               <span>02</span>
@@ -163,7 +163,7 @@ export function Home() {
               <div>
                 <a href="https://github.com/theolodocoder" target="_blank" rel="noreferrer">GitHub</a>
                 <a href="https://www.linkedin.com/in/promise-okafor-15a3851b5" target="_blank" rel="noreferrer">LinkedIn</a>
-                <a href="/promise-okafor-resume.pdf" target="_blank" rel="noreferrer">Résumé</a>
+                <a href="mailto:goforprodev@gmail.com">Email</a>
               </div>
               <p>Promise Okafor © {new Date().getFullYear()}</p>
               <a href="#top" aria-label="Back to top">Back to top ↑</a>

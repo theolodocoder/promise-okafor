@@ -11,14 +11,17 @@ export const metadata: Metadata = {
     template: "%s — Promise Okafor",
   },
   description:
-    "Senior frontend engineer building high-performance product systems with React, Next.js and TypeScript.",
+    "Senior frontend engineer building high-performance product systems across web, mobile and desktop with Angular, React, Next.js and TypeScript.",
   keywords: [
     "Promise Okafor",
     "Senior Frontend Engineer",
     "Staff Frontend Engineer",
     "React",
+    "Angular",
     "Next.js",
     "TypeScript",
+    "Mobile Development",
+    "Desktop Applications",
     "Frontend Architecture",
   ],
   openGraph: {
