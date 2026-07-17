@@ -30,6 +30,7 @@ export function Header() {
         <a href={href("#work")} onClick={() => setOpen(false)}>Work</a>
         <a href={href("#about")} onClick={() => setOpen(false)}>About</a>
         <a href={href("#experience")} onClick={() => setOpen(false)}>Experience</a>
+        <Link href="/blog" onClick={() => setOpen(false)}>Blog</Link>
         <a href={href("#contact")} onClick={() => setOpen(false)}>Contact</a>
       </nav>
     </header>

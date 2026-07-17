@@ -28,13 +28,13 @@ export const metadata: Metadata = {
     title: "Promise Okafor — Senior Frontend Engineer",
     description: "Product instinct. Systems thinking. Craft without theatre.",
     type: "website",
-    images: [{ url: "/og.png", alt: "Promise Okafor, Senior Frontend Engineer" }],
+    images: [{ url: "/og-blog.png", alt: "Promise Okafor — Field Notes on frontend systems and product engineering" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Promise Okafor — Senior Frontend Engineer",
     description: "Product instinct. Systems thinking. Craft without theatre.",
-    images: ["/og.png"],
+    images: ["/og-blog.png"],
   },
 };
 

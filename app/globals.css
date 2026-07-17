@@ -1,6 +1,7 @@
 @import "./home.css";
 @import "./visuals.css";
 @import "./case.css";
+@import "./blog.css";
 
 :root {
   --paper: #f1eadf;
