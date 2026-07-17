@@ -11,6 +11,7 @@ export type BlogPostMeta = {
   tags: string[];
   featured: boolean;
   readingTime: number;
+  wordCount: number;
 };
 
 export type BlogPost = BlogPostMeta & {
@@ -165,6 +166,7 @@ function parsePost(fileName: string): BlogPost {
     tags: (attributes.get("tags") ?? "").replace(/^\[|\]$/g, "").split(",").map((tag) => tag.trim()).filter(Boolean),
     featured: attributes.get("featured") === "true",
     readingTime: Math.max(1, Math.ceil(words / 210)),
+    wordCount: words,
     content,
     html: renderMarkdown(content),
     toc: getToc(content),

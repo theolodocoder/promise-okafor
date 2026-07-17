@@ -5,6 +5,8 @@ import { Header } from "@/components/header";
 import { BlogRuntimeVisual } from "@/components/blog-runtime-visual";
 import { BlogArticleTools } from "@/components/blog-article-tools";
 import { formatPostDate, getAllPosts, getPost } from "@/lib/blog";
+import { StructuredData } from "@/components/structured-data";
+import { BLOG_ID, OG_IMAGE, PERSON_ID, SITE_NAME, SITE_URL, SOCIAL_LINKS, WEBSITE_ID, absoluteUrl, breadcrumbSchema } from "@/lib/site";
 
 type PageProps = { params: Promise<{ slug: string }> };
 export function generateStaticParams() { return getAllPosts().map((post) => ({ slug: post.slug })); }
@@ -14,7 +16,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!post) return {};
   return {
     title: post.title, description: post.summary, alternates: { canonical: `/blog/${post.slug}/` }, authors: [{ name: "Promise Okafor" }],
-    openGraph: { type: "article", title: post.title, description: post.summary, publishedTime: post.publishedAt, modifiedTime: post.updatedAt, tags: post.tags, images: [{ url: "/og-blog.png", alt: post.title }] },
+    keywords: post.tags,
+    openGraph: { type: "article", url: `/blog/${post.slug}/`, siteName: SITE_NAME, title: post.title, description: post.summary, publishedTime: post.publishedAt, modifiedTime: post.updatedAt ?? post.publishedAt, authors: [SITE_NAME], section: post.category, tags: post.tags, images: [{ url: OG_IMAGE, width: 1732, height: 909, alt: post.title }] },
+    twitter: { card: "summary_large_image", title: post.title, description: post.summary, images: [OG_IMAGE] },
   };
 }
 
@@ -24,10 +28,35 @@ export default async function BlogPostPage({ params }: PageProps) {
   const posts = getAllPosts();
   const currentIndex = posts.findIndex((item) => item.slug === post.slug);
   const nextPost = posts[currentIndex + 1] ?? posts[currentIndex - 1];
-  const structuredData = { "@context": "https://schema.org", "@type": "BlogPosting", headline: post.title, description: post.summary, datePublished: post.publishedAt, dateModified: post.updatedAt ?? post.publishedAt, author: { "@type": "Person", name: "Promise Okafor", url: "https://promiseokafor.dev" }, mainEntityOfPage: `https://promiseokafor.dev/blog/${post.slug}/`, keywords: post.tags.join(", ") };
+  const articleUrl = absoluteUrl(`/blog/${post.slug}/`);
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "BlogPosting",
+        "@id": `${articleUrl}#article`,
+        url: articleUrl,
+        headline: post.title,
+        description: post.summary,
+        datePublished: post.publishedAt,
+        dateModified: post.updatedAt ?? post.publishedAt,
+        inLanguage: "en",
+        image: absoluteUrl(OG_IMAGE),
+        wordCount: post.wordCount,
+        articleSection: post.category,
+        keywords: post.tags.join(", "),
+        about: post.tags.map((tag) => ({ "@type": "Thing", name: tag })),
+        author: { "@type": "Person", "@id": PERSON_ID, name: SITE_NAME, url: SITE_URL, sameAs: SOCIAL_LINKS },
+        publisher: { "@id": PERSON_ID },
+        isPartOf: { "@id": BLOG_ID },
+        mainEntityOfPage: { "@type": "WebPage", "@id": articleUrl, isPartOf: { "@id": WEBSITE_ID } },
+      },
+      breadcrumbSchema([{ name: "Home", path: "/" }, { name: "Field Notes", path: "/blog/" }, { name: post.title, path: `/blog/${post.slug}/` }]),
+    ],
+  };
 
   return <><Header /><main className="article-page">
-    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }} />
+    <StructuredData data={structuredData} />
     <section className="article-hero section-shell">
       <div className="article-breadcrumb" data-hero-fade><Link href="/blog">Field notes</Link><span>/</span><span>{post.category}</span></div>
       <div className="article-meta" data-hero-fade><span>{formatPostDate(post.publishedAt)}</span><span>{post.readingTime} MIN READ</span><span>NO. {String(currentIndex + 1).padStart(3, "0")}</span></div>

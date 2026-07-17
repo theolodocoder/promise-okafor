@@ -3,20 +3,62 @@ import Link from "next/link";
 import { Header } from "@/components/header";
 import { BlogRuntimeVisual } from "@/components/blog-runtime-visual";
 import { formatPostDate, getAllPosts } from "@/lib/blog";
+import { StructuredData } from "@/components/structured-data";
+import { BLOG_ID, OG_IMAGE, PERSON_ID, SITE_NAME, SITE_URL, WEBSITE_ID, absoluteUrl, breadcrumbSchema } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Field Notes",
   description: "Deep notes on frontend architecture, product engineering, performance and technical leadership by Promise Okafor.",
-  alternates: { canonical: "/blog/" },
+  alternates: { canonical: "/blog/", types: { "application/rss+xml": absoluteUrl("/blog/rss.xml") } },
+  openGraph: {
+    type: "website",
+    url: "/blog/",
+    siteName: SITE_NAME,
+    title: "Field Notes — Promise Okafor",
+    description: "Deep notes on frontend architecture, product engineering, performance and technical leadership.",
+    images: [{ url: OG_IMAGE, width: 1732, height: 909, alt: "Field Notes by Promise Okafor" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Field Notes — Promise Okafor",
+    description: "Deep notes on frontend architecture, product engineering, performance and technical leadership.",
+    images: [OG_IMAGE],
+  },
 };
 
 export default function BlogPage() {
   const posts = getAllPosts();
   const featured = posts.find((post) => post.featured) ?? posts[0];
   const remaining = posts.filter((post) => post.slug !== featured?.slug);
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Blog",
+        "@id": BLOG_ID,
+        url: absoluteUrl("/blog/"),
+        name: "Field Notes",
+        description: "Deep notes on frontend architecture, product engineering, performance and technical leadership by Promise Okafor.",
+        inLanguage: "en",
+        isPartOf: { "@id": WEBSITE_ID },
+        author: { "@id": PERSON_ID },
+        blogPost: posts.map((post) => ({
+          "@type": "BlogPosting",
+          "@id": `${absoluteUrl(`/blog/${post.slug}/`)}#article`,
+          url: absoluteUrl(`/blog/${post.slug}/`),
+          headline: post.title,
+          description: post.summary,
+          datePublished: post.publishedAt,
+          dateModified: post.updatedAt ?? post.publishedAt,
+          author: { "@id": PERSON_ID },
+        })),
+      },
+      breadcrumbSchema([{ name: "Home", path: "/" }, { name: "Field Notes", path: "/blog/" }]),
+    ],
+  };
 
   return (
-    <><Header /><main className="blog-index">
+    <><StructuredData data={structuredData} /><Header /><main className="blog-index">
       <section className="blog-hero section-shell">
         <div className="blog-hero-top" data-hero-fade><span>FIELD NOTES / {String(posts.length).padStart(2, "0")}</span><p>Architecture, product craft, and the decisions behind the interface.</p></div>
         <h1><span className="line-mask"><span data-hero-line>Thinking in</span></span><span className="line-mask blog-hero-indent"><span data-hero-line><em>public.</em></span></span></h1>

@@ -11,7 +11,8 @@ The blog is file-based, so it does not need a backend or CMS.
 ---
 title: Your article title
 summary: A concise one or two sentence description.
-publishedAt: 2026-07-17
+publishedAt: 2026-07-17T09:00:00+01:00
+updatedAt: 2026-07-17T09:00:00+01:00
 category: Engineering notes
 tags: [Architecture, React, Leadership]
 featured: false

@@ -1,7 +1,8 @@
 ---
 title: Building Paje to understand what frameworks hide
 summary: A close look at the tiny reactive UI runtime I am building—from hyperscript and action dispatch to DOM lifecycle, deliberate constraints, and the lessons hiding beneath familiar abstractions.
-publishedAt: 2026-07-17
+publishedAt: 2026-07-17T09:00:00+01:00
+updatedAt: 2026-07-17T09:00:00+01:00
 category: Engineering notes
 tags: [JavaScript, Runtime Architecture, Virtual DOM, Frontend]
 featured: true

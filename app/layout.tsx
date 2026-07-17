@@ -1,17 +1,47 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "@fontsource-variable/manrope";
 import "@fontsource/instrument-serif";
 import "./globals.css";
 import { MotionLayer } from "@/components/motion-layer";
+import { absoluteUrl, OG_IMAGE, SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://promiseokafor.dev"),
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "Promise Okafor — Senior Frontend Engineer",
-    template: "%s — Promise Okafor",
+    default: SITE_TITLE,
+    template: `%s — ${SITE_NAME}`,
   },
-  description:
-    "Senior frontend engineer building high-performance product systems across web, mobile and desktop with Angular, React, Next.js and TypeScript.",
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  authors: [{ name: SITE_NAME, url: SITE_URL }],
+  creator: SITE_NAME,
+  publisher: SITE_NAME,
+  category: "technology",
+  referrer: "origin-when-cross-origin",
+  alternates: {
+    canonical: "/",
+    types: { "application/rss+xml": absoluteUrl("/blog/rss.xml") },
+  },
+  manifest: "/manifest.webmanifest",
+  icons: {
+    icon: [
+      { url: "/icon-192.png", type: "image/png", sizes: "192x192" },
+      { url: "/icon-512.png", type: "image/png", sizes: "512x512" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", type: "image/png", sizes: "180x180" }],
+  },
+  formatDetection: { email: false, address: false, telephone: false },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
   keywords: [
     "Promise Okafor",
     "Senior Frontend Engineer",
@@ -25,17 +55,25 @@ export const metadata: Metadata = {
     "Frontend Architecture",
   ],
   openGraph: {
-    title: "Promise Okafor — Senior Frontend Engineer",
-    description: "Product instinct. Systems thinking. Craft without theatre.",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
     type: "website",
-    images: [{ url: "/og-blog.png", alt: "Promise Okafor — Field Notes on frontend systems and product engineering" }],
+    url: "/",
+    siteName: SITE_NAME,
+    locale: "en_NG",
+    images: [{ url: OG_IMAGE, width: 1732, height: 909, alt: "Promise Okafor — frontend systems and product engineering" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Promise Okafor — Senior Frontend Engineer",
-    description: "Product instinct. Systems thinking. Craft without theatre.",
-    images: ["/og-blog.png"],
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    images: [OG_IMAGE],
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#f1eadf",
+  colorScheme: "light",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

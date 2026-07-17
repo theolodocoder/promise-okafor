@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { Header } from "@/components/header";
 import { ProjectVisual } from "@/components/project-visual";
 import { getProject, projects } from "@/data/portfolio";
+import { StructuredData } from "@/components/structured-data";
+import { OG_IMAGE, PERSON_ID, SITE_NAME, WEBSITE_ID, absoluteUrl, breadcrumbSchema } from "@/lib/site";
 
 type PageProps = { params: Promise<{ slug: string }> };
 
@@ -18,6 +20,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: project.title,
     description: project.summary,
+    keywords: project.tags,
+    alternates: { canonical: `/work/${project.slug}/` },
+    openGraph: {
+      type: "website",
+      url: `/work/${project.slug}/`,
+      siteName: SITE_NAME,
+      title: `${project.title} — Frontend engineering case study`,
+      description: project.summary,
+      images: [{ url: OG_IMAGE, width: 1732, height: 909, alt: `${project.title} frontend engineering case study by Promise Okafor` }],
+    },
+    twitter: { card: "summary_large_image", title: `${project.title} — Frontend engineering case study`, description: project.summary, images: [OG_IMAGE] },
   };
 }
 
@@ -28,10 +41,34 @@ export default async function WorkPage({ params }: PageProps) {
 
   const currentIndex = projects.findIndex((item) => item.slug === project.slug);
   const nextProject = projects[(currentIndex + 1) % projects.length];
+  const projectUrl = absoluteUrl(`/work/${project.slug}/`);
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "CreativeWork",
+        "@id": `${projectUrl}#case-study`,
+        url: projectUrl,
+        name: `${project.title} — Frontend engineering case study`,
+        headline: project.title,
+        description: project.summary,
+        abstract: project.thesis,
+        dateCreated: project.year,
+        inLanguage: "en",
+        keywords: project.tags.join(", "),
+        creator: { "@id": PERSON_ID },
+        isPartOf: { "@id": WEBSITE_ID },
+        about: project.tags.map((tag) => ({ "@type": "Thing", name: tag })),
+        sameAs: project.github ? [project.github] : undefined,
+      },
+      breadcrumbSchema([{ name: "Home", path: "/" }, { name: project.title, path: `/work/${project.slug}/` }]),
+    ],
+  };
 
   return (
     <>
       <Header />
+      <StructuredData data={structuredData} />
       <main className="case-page">
         <section className="case-hero section-shell">
           <div className="case-breadcrumb" data-hero-fade>
