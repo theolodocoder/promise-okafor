@@ -1,4 +1,4 @@
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://promise-okafor-portfolio.goforprodev.chatgpt.site").replace(/\/$/, "");
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://promise-okafor.vercel.app").replace(/\/$/, "");
 export const SITE_NAME = "Promise Okafor";
 export const SITE_TITLE = "Promise Okafor — Senior Frontend Engineer";
 export const SITE_DESCRIPTION = "Senior frontend engineer building accessible, high-performance product systems across web, mobile and desktop with Angular, React, Next.js and TypeScript.";
