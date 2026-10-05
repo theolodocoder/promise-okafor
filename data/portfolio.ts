@@ -149,15 +149,15 @@ export const experience = [
   },
   {
     period: "2022 — 2024",
-    company: "Solace Imaging",
-    role: "Frontend Engineer",
+    company: "Solace Imaging · CelebratePal",
+    role: "Founding Frontend Engineer",
     summary:
-      "Improving the speed and usability of a production medical-imaging platform where dependable access to complex visual data matters.",
+      "One of the founding engineers behind CelebratePal, which automates birthdays, gift vouchers and email/SMS campaigns for 3,000+ business clients. I started its first version.",
     impact: [
       "Implemented lazy loading, image optimization and code splitting to reduce the cost of media-heavy product experiences and improve perceived load time.",
       "Built REST-backed data workflows and translated cross-functional design reviews into responsive, production-ready interfaces.",
     ],
-    stack: ["React", "REST APIs", "Performance", "Medical imaging"],
+    stack: ["React", "REST APIs", "Performance", "Marketing automation"],
   },
   {
     period: "2023 — 2024",
