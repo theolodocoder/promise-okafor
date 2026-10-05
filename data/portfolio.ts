@@ -138,7 +138,7 @@ export const experience = [
   {
     period: "2024 — NOW",
     company: "JobWhisper (formerly Lightforth)",
-    role: "Lead Frontend Engineer",
+    role: "Lead Frontend Engineer · Founding engineer",
     summary:
       "Owning frontend architecture across the core career platform and its web, mobile, browser-extension, B2B and desktop surfaces—including Cosella.",
     impact: [
