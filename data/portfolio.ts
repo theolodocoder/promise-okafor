@@ -47,7 +47,7 @@ export const projects: Project[] = [
     index: "02",
     title: "Paje",
     category: "Framework Engineering",
-    year: "2024",
+    year: "2025",
     summary:
       "A tiny reactive JavaScript framework built to make the machinery behind modern UI libraries understandable.",
     thesis:
@@ -124,7 +124,7 @@ export const projects: Project[] = [
 
 export const experience = [
   {
-    period: "CURRENT",
+    period: "2026 — NOW",
     company: "Zabira",
     role: "Senior Frontend Engineer",
     summary:
@@ -137,20 +137,21 @@ export const experience = [
   },
   {
     period: "2024 — NOW",
-    company: "Lightforth",
-    role: "Frontend Lead / Founding Frontend Engineer",
+    company: "JobWhisper (formerly Lightforth)",
+    role: "Lead Frontend Engineer",
     summary:
       "Owning frontend architecture across the core career platform and its web, mobile, browser-extension, B2B and desktop surfaces—including Cosella.",
     impact: [
       "Designed fault-tolerant realtime interview and sales sessions with WebSocket prewarming, heartbeats, exponential backoff, reconnection UI and audio-stream recovery across Windows and macOS.",
       "Built product systems spanning resume editing, interview prep, admin, team, billing and knowledge tools, Electron copilots and shared typed foundations so multiple surfaces can evolve coherently.",
+      "Work with AI coding agents every day: rebuilt the V3 frontend (11 apps) in about seven weeks and took a React Native app to TestFlight in under three, with typed contracts, tests and CI gates checking every change.",
     ],
     stack: ["React", "Electron", "React Native", "Realtime systems", "Design systems"],
   },
   {
-    period: "2024 — NOW",
+    period: "2022 — 2024",
     company: "Solace Imaging",
-    role: "Frontend Developer",
+    role: "Frontend Engineer",
     summary:
       "Improving the speed and usability of a production medical-imaging platform where dependable access to complex visual data matters.",
     impact: [
@@ -160,9 +161,9 @@ export const experience = [
     stack: ["React", "REST APIs", "Performance", "Medical imaging"],
   },
   {
-    period: "2023 — NOW",
+    period: "2023 — 2024",
     company: "Carbon Businesses / Vella Finance",
-    role: "Frontend Developer",
+    role: "Frontend Engineer",
     summary:
       "Shipping customer-facing savings products and financial analytics for a fintech platform with multiple investment journeys.",
     impact: [
@@ -174,7 +175,7 @@ export const experience = [
   {
     period: "2022 — 2024",
     company: "MaiTech Studios",
-    role: "Frontend Developer",
+    role: "Frontend Engineer",
     summary:
       "Architected and delivered a full-scale commerce frontend with responsive behavior across device classes and complex asynchronous journeys.",
     impact: [
@@ -184,7 +185,7 @@ export const experience = [
     stack: ["React", "Redux", "REST APIs", "Prisma", "Commerce"],
   },
   {
-    period: "2020 — 2022",
+    period: "2020 — 2021",
     company: "Odigital Agency",
     role: "Frontend Lead · Promoted from intern",
     summary:
