@@ -144,7 +144,6 @@ export const experience = [
     impact: [
       "Designed fault-tolerant realtime interview and sales sessions with WebSocket prewarming, heartbeats, exponential backoff, reconnection UI and audio-stream recovery across Windows and macOS.",
       "Built product systems spanning resume editing, interview prep, admin, team, billing and knowledge tools, Electron copilots and shared typed foundations so multiple surfaces can evolve coherently.",
-      "Work with AI coding agents every day: rebuilt the V3 frontend (11 apps) in about seven weeks and took a React Native app to TestFlight in under three, with typed contracts, tests and CI gates checking every change.",
     ],
     stack: ["React", "Electron", "React Native", "Realtime systems", "Design systems"],
   },
