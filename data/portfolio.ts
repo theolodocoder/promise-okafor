@@ -13,13 +13,41 @@ export type Project = {
   system: string;
   outcome: string;
   github?: string;
+  image?: string;
   tone: "ember" | "olive" | "plum" | "sand";
 };
 
 export const projects: Project[] = [
   {
-    slug: "cosella",
+    slug: "morrow",
     index: "01",
+    title: "Morrow",
+    category: "Realtime Collaborative Platform",
+    year: "2026",
+    summary:
+      "A writing platform where teams draft the same chapter live, propose and review changes, and publish to readers who comment line by line.",
+    thesis:
+      "Live co-writing on a CRDT, proposals and branches with conflict-aware review, voice rooms over WebRTC, and one access policy enforced on every route and socket.",
+    role: "Creator · design, frontend and platform engineering",
+    tags: ["Next.js", "React", "TypeScript", "Yjs", "Tiptap", "WebRTC", "Fastify", "PostgreSQL"],
+    metrics: [
+      { value: "12", label: "writers live in one chapter" },
+      { value: "4", label: "apps, one typed monorepo" },
+      { value: "AA", label: "WCAG 2.2, axe on every screen" },
+    ],
+    challenge:
+      "Many people writing one chapter at once can never lose a word or silently overwrite each other, and a read-only collaborator must stay read-only even on a raw WebSocket. It also had to feel calm on a phone, where most reading happens.",
+    system:
+      "Edits merge through Yjs over a Hocuspocus collaboration service, the only writer of document content, with merge-on-write persistence and undoable restores. A Next.js app built on React Aria and Tiptap talks to a Fastify API with shared Zod contracts, and a single can() policy decides every permission in both the API and the socket. Voice rooms run browser to browser with signalling over the chapter's authorised connection.",
+    outcome:
+      "A working product with live carets and presence, proposals with word-level diffs, what-if branches, paragraph comments, reader polls, a staff moderation console and a phone layout, covered by real-Postgres integration tests and end-to-end tests that run twelve browsers in one chapter.",
+    github: "https://github.com/theolodocoder/morrow",
+    image: "/work/morrow.jpg",
+    tone: "sand",
+  },
+  {
+    slug: "cosella",
+    index: "02",
     title: "Cosella",
     category: "Cross-platform AI Product",
     year: "2026",
@@ -44,7 +72,7 @@ export const projects: Project[] = [
   },
   {
     slug: "paje",
-    index: "02",
+    index: "03",
     title: "Paje",
     category: "Framework Engineering",
     year: "2025",
@@ -70,7 +98,7 @@ export const projects: Project[] = [
   },
   {
     slug: "triggr-cloud",
-    index: "03",
+    index: "04",
     title: "Triggr Cloud",
     category: "Realtime Developer Tooling",
     year: "2024",
@@ -96,7 +124,7 @@ export const projects: Project[] = [
   },
   {
     slug: "resume-parser",
-    index: "04",
+    index: "05",
     title: "Resume Parser",
     category: "TypeScript Library",
     year: "2026",

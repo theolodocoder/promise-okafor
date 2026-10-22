@@ -42,7 +42,7 @@ export function Home() {
         <section className="work-section section-shell" id="work">
           <div className="section-heading" data-reveal>
             <p><span>01</span> SELECTED WORK</p>
-            <h2>Four systems.<br />One point of view.</h2>
+            <h2>Five systems.<br />One point of view.</h2>
             <span className="heading-note">Chosen for depth, not volume.</span>
           </div>
 

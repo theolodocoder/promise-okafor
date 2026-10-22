@@ -1,6 +1,14 @@
 import type { Project } from "@/data/portfolio";
 
 export function ProjectVisual({ project, compact = false }: { project: Project; compact?: boolean }) {
+  if (project.image) {
+    return (
+      <div className={`project-visual has-image tone-${project.tone} ${compact ? "is-compact" : ""}`} data-project-visual>
+        <img src={project.image} alt={`${project.title}: ${project.summary}`} loading="lazy" decoding="async" />
+      </div>
+    );
+  }
+
   return (
     <div
       className={`project-visual tone-${project.tone} ${compact ? "is-compact" : ""}`}
