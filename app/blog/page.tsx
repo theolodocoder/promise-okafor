@@ -2,28 +2,14 @@ import "../home.css";
 import type { Metadata } from "next";
 import { formatMonthYear, getAllPosts } from "@/lib/blog";
 import { StructuredData } from "@/components/structured-data";
-import { BLOG_ID, OG_IMAGE, PERSON_ID, SITE_NAME, WEBSITE_ID, absoluteUrl, breadcrumbSchema } from "@/lib/site";
+import { BLOG_ID, PERSON_ID, WEBSITE_ID, absoluteUrl, breadcrumbSchema } from "@/lib/site";
+import { PERSON_REF, ogImage, shareMetadata } from "@/lib/seo";
 
 const DESC = "Frontend decisions I have made, and what happened after.";
 
 export const metadata: Metadata = {
   title: "Writings",
-  description: DESC,
-  alternates: { canonical: "/blog/", types: { "application/rss+xml": absoluteUrl("/blog/rss.xml") } },
-  openGraph: {
-    type: "website",
-    url: "/blog/",
-    siteName: SITE_NAME,
-    title: "Writings by Promise Okafor",
-    description: DESC,
-    images: [{ url: OG_IMAGE, width: 1732, height: 909, alt: "Writings by Promise Okafor" }],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Writings by Promise Okafor",
-    description: DESC,
-    images: [OG_IMAGE],
-  },
+  ...shareMetadata({ path: "/blog/", title: "Writings by Promise Okafor", description: DESC, alt: "Writings by Promise Okafor: frontend decisions I have made, and what happened after." }),
 };
 
 export default function BlogPage() {
@@ -39,7 +25,9 @@ export default function BlogPage() {
         description: DESC,
         inLanguage: "en",
         isPartOf: { "@id": WEBSITE_ID },
-        author: { "@id": PERSON_ID },
+        image: absoluteUrl(ogImage("/blog/")),
+        author: PERSON_REF,
+        publisher: { "@id": PERSON_ID },
         blogPost: posts.map((post) => ({
           "@type": "BlogPosting",
           "@id": `${absoluteUrl(`/blog/${post.slug}/`)}#article`,
@@ -48,6 +36,7 @@ export default function BlogPage() {
           description: post.summary,
           datePublished: post.publishedAt,
           dateModified: post.updatedAt ?? post.publishedAt,
+          image: absoluteUrl(ogImage(`/blog/${post.slug}/`)),
           author: { "@id": PERSON_ID },
         })),
       },

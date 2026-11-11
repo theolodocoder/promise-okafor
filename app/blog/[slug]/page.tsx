@@ -6,7 +6,8 @@ import { notFound } from "next/navigation";
 import { formatMonthYear, formatPostDate, getAllPosts, getPost } from "@/lib/blog";
 import { ReadProgress } from "@/components/read-progress";
 import { StructuredData } from "@/components/structured-data";
-import { BLOG_ID, OG_IMAGE, PERSON_ID, SITE_NAME, SITE_URL, SOCIAL_LINKS, WEBSITE_ID, absoluteUrl, breadcrumbSchema } from "@/lib/site";
+import { BLOG_ID, WEBSITE_ID, absoluteUrl, breadcrumbSchema } from "@/lib/site";
+import { PERSON_REF, ogImage, pageTitle, shareMetadata } from "@/lib/seo";
 
 type PageProps = { params: Promise<{ slug: string }> };
 export function generateStaticParams() { return getAllPosts().map((post) => ({ slug: post.slug })); }
@@ -14,11 +15,19 @@ export function generateStaticParams() { return getAllPosts().map((post) => ({ s
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const post = getPost((await params).slug);
   if (!post) return {};
+  const path = `/blog/${post.slug}/`;
   return {
-    title: post.title, description: post.summary, alternates: { canonical: `/blog/${post.slug}/` }, authors: [{ name: "Promise Okafor" }],
+    title: pageTitle(post.title),
+    authors: [{ name: "Promise Okafor" }],
     keywords: post.tags,
-    openGraph: { type: "article", url: `/blog/${post.slug}/`, siteName: SITE_NAME, title: post.title, description: post.summary, publishedTime: post.publishedAt, modifiedTime: post.updatedAt ?? post.publishedAt, authors: [SITE_NAME], section: post.category, tags: post.tags, images: [{ url: OG_IMAGE, width: 1732, height: 909, alt: post.title }] },
-    twitter: { card: "summary_large_image", title: post.title, description: post.summary, images: [OG_IMAGE] },
+    ...shareMetadata({
+      path,
+      title: post.title,
+      description: post.summary,
+      alt: `${post.title}, a post by Promise Okafor in ${post.category}.`,
+      type: "article",
+      article: { publishedTime: post.publishedAt, modifiedTime: post.updatedAt ?? post.publishedAt, section: post.category, tags: post.tags },
+    }),
   };
 }
 
@@ -40,13 +49,13 @@ export default async function BlogPostPage({ params }: PageProps) {
         datePublished: post.publishedAt,
         dateModified: post.updatedAt ?? post.publishedAt,
         inLanguage: "en",
-        image: absoluteUrl(OG_IMAGE),
+        image: { "@type": "ImageObject", url: absoluteUrl(ogImage(`/blog/${post.slug}/`)), width: 1200, height: 630 },
         wordCount: post.wordCount,
         articleSection: post.category,
         keywords: post.tags.join(", "),
         about: post.tags.map((tag) => ({ "@type": "Thing", name: tag })),
-        author: { "@type": "Person", "@id": PERSON_ID, name: SITE_NAME, url: SITE_URL, sameAs: SOCIAL_LINKS },
-        publisher: { "@id": PERSON_ID },
+        author: PERSON_REF,
+        publisher: PERSON_REF,
         isPartOf: { "@id": BLOG_ID },
         mainEntityOfPage: { "@type": "WebPage", "@id": articleUrl, isPartOf: { "@id": WEBSITE_ID } },
       },

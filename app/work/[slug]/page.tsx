@@ -7,7 +7,8 @@ import { getAllWorks, getChildWorks, getWork } from "@/lib/works";
 import { ReadProgress } from "@/components/read-progress";
 import { StructuredData } from "@/components/structured-data";
 import { WorkTile } from "@/components/work-tile";
-import { OG_IMAGE, PERSON_ID, SITE_NAME, WEBSITE_ID, absoluteUrl, breadcrumbSchema } from "@/lib/site";
+import { WEBSITE_ID, absoluteUrl, breadcrumbSchema } from "@/lib/site";
+import { PERSON_REF, lastModified, ogImage, pageTitle, shareMetadata } from "@/lib/seo";
 
 type PageProps = { params: Promise<{ slug: string }> };
 
@@ -19,19 +20,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = await params;
   const project = getWork(slug);
   if (!project) return {};
+  const parent = project.parent ? getWork(project.parent) : undefined;
   return {
-    title: project.title,
-    description: project.line,
-    alternates: { canonical: `/work/${project.slug}/` },
-    openGraph: {
-      type: "website",
-      url: `/work/${project.slug}/`,
-      siteName: SITE_NAME,
-      title: `${project.title}, frontend engineering case study`,
-      description: project.line,
-      images: [{ url: OG_IMAGE, width: 1732, height: 909, alt: `${project.title} frontend engineering case study by Promise Okafor` }],
-    },
-    twitter: { card: "summary_large_image", title: `${project.title}, frontend engineering case study`, description: project.line, images: [OG_IMAGE] },
+    title: pageTitle(project.title),
+    ...shareMetadata({
+      path: `/work/${project.slug}/`,
+      title: project.title,
+      description: project.line || project.subtitle,
+      alt: `${project.title}, a ${parent ? `${parent.title} ` : ""}case study by Promise Okafor (${project.field}).`,
+      type: "article",
+      article: { modifiedTime: lastModified(`content/work/${project.slug}.md`), section: project.field },
+    }),
   };
 }
 
@@ -46,7 +45,7 @@ export default async function WorkPage({ params }: PageProps) {
   if (lead) { preload(`/stage/${lead[1]}.jpg`, { as: "image" }); preload(lead[2], { as: "image" }); }
 
   const projectUrl = absoluteUrl(`/work/${project.slug}/`);
-  const crumbs = [{ name: "Home", path: "/" }, ...(parent ? [{ name: parent.title, path: `/work/${parent.slug}/` }] : []), { name: project.title, path: `/work/${project.slug}/` }];
+  const crumbs = [{ name: "Home", path: "/" }, { name: "Work", path: "/#works" }, ...(parent ? [{ name: parent.title, path: `/work/${parent.slug}/` }] : []), { name: project.title, path: `/work/${project.slug}/` }];
   const structuredData = {
     "@context": "https://schema.org",
     "@graph": [
@@ -59,9 +58,14 @@ export default async function WorkPage({ params }: PageProps) {
         description: project.line,
         abstract: project.subtitle || project.line,
         dateCreated: project.year.match(/\d{4}/)?.[0], // "2024 to 2026" → "2024"; omitted when there is no year
+        dateModified: lastModified(`content/work/${project.slug}.md`),
+        image: { "@type": "ImageObject", url: absoluteUrl(ogImage(`/work/${project.slug}/`)), width: 1200, height: 630 },
+        genre: project.field,
         inLanguage: "en",
-        creator: { "@id": PERSON_ID },
-        isPartOf: { "@id": WEBSITE_ID },
+        author: PERSON_REF,
+        creator: PERSON_REF,
+        mainEntityOfPage: projectUrl,
+        isPartOf: parent ? { "@id": `${absoluteUrl(`/work/${parent.slug}/`)}#case-study` } : { "@id": WEBSITE_ID },
       },
       breadcrumbSchema(crumbs),
     ],

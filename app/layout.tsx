@@ -6,7 +6,8 @@ import "./motion.css";
 import { Motion } from "@/components/motion";
 import { Frame } from "@/components/frame";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
-import { absoluteUrl, OG_IMAGE, SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site";
+import { FEEDS, ogImage } from "@/lib/seo";
 
 // Fonts live in the repo (latin subsets from Google Fonts, both OFL) so the build does not depend on the network.
 const figtree = localFont({ src: "./fonts/figtree-latin.woff2", weight: "400 600", style: "normal", variable: "--font-figtree", display: "swap" });
@@ -25,10 +26,8 @@ export const metadata: Metadata = {
   publisher: SITE_NAME,
   category: "technology",
   referrer: "origin-when-cross-origin",
-  alternates: {
-    canonical: "/",
-    types: { "application/rss+xml": absoluteUrl("/blog/rss.xml") },
-  },
+  // each page sets its own canonical; the layout only advertises the feeds (a page's alternates replace these)
+  alternates: { types: FEEDS },
   manifest: "/manifest.webmanifest",
   icons: {
     icon: [
@@ -63,20 +62,20 @@ export const metadata: Metadata = {
     "Desktop Applications",
     "Frontend Architecture",
   ],
+  // fallback share card for pages without their own (the 404); every real page sets its own through shareMetadata
   openGraph: {
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
     type: "website",
-    url: "/",
     siteName: SITE_NAME,
     locale: "en_NG",
-    images: [{ url: OG_IMAGE, width: 1732, height: 909, alt: "Promise Okafor, frontend systems and product engineering" }],
+    images: [{ url: ogImage("/"), width: 1200, height: 630, alt: "Promise Okafor, Lead Frontend Engineer in Lagos" }],
   },
   twitter: {
     card: "summary_large_image",
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
-    images: [OG_IMAGE],
+    images: [{ url: ogImage("/"), alt: "Promise Okafor, Lead Frontend Engineer in Lagos" }],
   },
 };
 

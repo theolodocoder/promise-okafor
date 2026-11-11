@@ -4,8 +4,14 @@ import { StructuredData } from "@/components/structured-data";
 import { WorkTile } from "@/components/work-tile";
 import { formatMonthYear, getAllPosts } from "@/lib/blog";
 import { getAllWorks } from "@/lib/works";
-import { PERSON_ID, SITE_DESCRIPTION, SITE_NAME, SITE_URL, SOCIAL_LINKS, WEBSITE_ID } from "@/lib/site";
+import type { Metadata } from "next";
+import { PERSON_ID, SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL, SOCIAL_LINKS, WEBSITE_ID, absoluteUrl } from "@/lib/site";
+import { lastModified, ogImage, shareMetadata } from "@/lib/seo";
 
+export const metadata: Metadata = {
+  title: { absolute: SITE_TITLE },
+  ...shareMetadata({ path: "/", title: SITE_TITLE, description: SITE_DESCRIPTION, alt: "Promise Okafor, Lead Frontend Engineer in Lagos: I build frontends teams do not have to undo." }),
+};
 
 export default function HomePage() {
   const structuredData = {
@@ -14,7 +20,7 @@ export default function HomePage() {
       {
         "@type": "WebSite",
         "@id": WEBSITE_ID,
-        url: SITE_URL,
+        url: `${SITE_URL}/`,
         name: SITE_NAME,
         alternateName: "Promise Okafor Portfolio",
         description: SITE_DESCRIPTION,
@@ -24,9 +30,12 @@ export default function HomePage() {
       {
         "@type": "ProfilePage",
         "@id": `${SITE_URL}/#profile-page`,
-        url: SITE_URL,
-        name: "Promise Okafor, frontend engineer",
+        url: `${SITE_URL}/`,
+        name: SITE_TITLE,
         description: SITE_DESCRIPTION,
+        inLanguage: "en",
+        dateModified: lastModified("app/page.tsx"),
+        primaryImageOfPage: { "@type": "ImageObject", url: absoluteUrl(ogImage("/")), width: 1200, height: 630 },
         isPartOf: { "@id": WEBSITE_ID },
         mainEntity: { "@id": PERSON_ID },
       },
@@ -34,12 +43,14 @@ export default function HomePage() {
         "@type": "Person",
         "@id": PERSON_ID,
         name: SITE_NAME,
-        url: SITE_URL,
-        jobTitle: "Senior Frontend Engineer",
+        url: `${SITE_URL}/`,
+        image: absoluteUrl("/portrait-220.jpg"),
+        jobTitle: "Lead Frontend Engineer",
         description: SITE_DESCRIPTION,
+        address: { "@type": "PostalAddress", addressLocality: "Lagos", addressCountry: "NG" },
         sameAs: SOCIAL_LINKS,
         knowsAbout: ["Frontend architecture", "Angular", "React", "Next.js", "TypeScript", "React Native", "Electron", "Web performance", "Accessibility", "Design systems"],
-        worksFor: [{ "@type": "Organization", name: "Cosella" }],
+        worksFor: { "@type": "Organization", name: "Cosella" },
       },
     ],
   };
