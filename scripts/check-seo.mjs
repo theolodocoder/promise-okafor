@@ -14,7 +14,7 @@ const local = (url) => (url.startsWith(SITE) ? join(OUT, decodeURIComponent(url.
 const exists = (url) => { const f = local(url); return f && existsSync(f.endsWith("/") ? join(f, "index.html") : f); };
 const metas = (html, attr, key) => [...html.matchAll(new RegExp(`<meta ${attr}="${key}" content="([^"]*)"`, "g"))].map((m) => decode(m[1]));
 
-const pages = walk(OUT).filter((f) => f.endsWith(".html") && !/(^|\/)(404|_not-found)(\/|\.html|$)/.test(f.slice(OUT.length + 1)));
+const pages = walk(OUT).filter((f) => f.endsWith(".html") && !/(^|\/)(404|_not-found)(\/|\.html|$)/.test(f.slice(OUT.length + 1)) && !/(^|\/)google[0-9a-f]+\.html$/.test(f));
 for (const file of pages) {
   const html = readFileSync(file, "utf8");
   const say = (msg) => problems.push(`${file}: ${msg}`);
