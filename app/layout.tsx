@@ -1,15 +1,22 @@
 import type { Metadata, Viewport } from "next";
-import "@fontsource-variable/manrope";
-import "@fontsource/instrument-serif";
+import localFont from "next/font/local";
 import "./globals.css";
-import { MotionLayer } from "@/components/motion-layer";
+import "./stage.css";
+import "./motion.css";
+import { Motion } from "@/components/motion";
+import { Frame } from "@/components/frame";
+import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import { absoluteUrl, OG_IMAGE, SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site";
+
+// Fonts live in the repo (latin subsets from Google Fonts, both OFL) so the build does not depend on the network.
+const figtree = localFont({ src: "./fonts/figtree-latin.woff2", weight: "400 600", style: "normal", variable: "--font-figtree", display: "swap" });
+const serif = localFont({ src: "./fonts/instrument-serif-italic-latin.woff2", weight: "400", style: "italic", variable: "--font-serif", display: "swap" });
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
     default: SITE_TITLE,
-    template: `%s — ${SITE_NAME}`,
+    template: `%s | ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
   applicationName: SITE_NAME,
@@ -44,8 +51,8 @@ export const metadata: Metadata = {
   },
   keywords: [
     "Promise Okafor",
+    "Lead Frontend Engineer",
     "Senior Frontend Engineer",
-    "Staff Frontend Engineer",
     "React",
     "Angular",
     "Next.js",
@@ -61,7 +68,7 @@ export const metadata: Metadata = {
     url: "/",
     siteName: SITE_NAME,
     locale: "en_NG",
-    images: [{ url: OG_IMAGE, width: 1732, height: 909, alt: "Promise Okafor — frontend systems and product engineering" }],
+    images: [{ url: OG_IMAGE, width: 1732, height: 909, alt: "Promise Okafor, frontend systems and product engineering" }],
   },
   twitter: {
     card: "summary_large_image",
@@ -72,17 +79,23 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#f1eadf",
-  colorScheme: "light",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#F6F7F9" },
+    { media: "(prefers-color-scheme: dark)", color: "#0B1220" },
+  ],
+  colorScheme: "light dark",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${figtree.variable} ${serif.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
       <body id="top">
         <a className="skip-link" href="#main-content">Skip to content</a>
-        <MotionLayer />
-        <div id="main-content">{children}</div>
+        <Frame>{children}</Frame>
+        <Motion />
       </body>
     </html>
   );

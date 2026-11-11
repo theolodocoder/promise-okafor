@@ -1,0 +1,34 @@
+/* One-time reveals. Every hidden start state sits under html.js:not(.shown) (class added by the inline theme script)
+   and inside no-preference, so with JavaScript off or reduced motion the page is simply its final state. */
+:is(h1, h2):has(> .up) { overflow: hidden; padding-bottom: .08em; }
+:is(h1, h2) .up { display: block; }
+
+@media (prefers-reduced-motion: no-preference) {
+  /* each rule draws itself across the page when its section arrives, then the crosses fade in */
+  html.js:not(.shown) .band { border-top-color: transparent; background: linear-gradient(var(--line), var(--line)) top left / 0% 1px no-repeat border-box; transition: background-size 1.2s var(--ease); }
+  html.js:not(.shown) .band.in { background-size: 100% 1px; }
+  html.js:not(.shown) .band::before, html.js:not(.shown) .band::after { opacity: 0; transition: opacity .5s .9s; }
+  html.js:not(.shown) .band.in::before, html.js:not(.shown) .band.in::after { opacity: 1; }
+
+  /* things that rise into place; --d staggers neighbours */
+  html.js:not(.shown) .rv { opacity: 0; transform: translateY(26px); transition: opacity .7s ease, transform .9s var(--ease); transition-delay: calc(var(--d, 0) * 70ms); }
+  html.js:not(.shown) .rv.in { opacity: 1; transform: none; }
+  /* the hero is in view on arrival, so it rises on load from CSS alone: its first paint never waits for JavaScript */
+  html.js:not(.shown) .hero h1 .w { display: inline-block; animation: rise-w .9s var(--ease) both; animation-delay: calc(var(--d, 0) * 45ms); }
+  html.js:not(.shown) .hero :is(.story p, .links) { animation: rise .9s var(--ease) both; animation-delay: calc(450ms + var(--d, 0) * 70ms); }
+  html.js:not(.shown) :is(h1, h2) .up { transform: translateY(112%); transition: transform 1s var(--ease); }
+  html.js:not(.shown) :is(h1, h2).in .up { transform: none; }
+
+  /* work frames wipe up from the bottom while what is inside settles back */
+  html.js:not(.shown) .tile .frame { clip-path: inset(100% 0 0 0 round 8px); transition: clip-path 1.1s var(--ease); transition-delay: calc(var(--d, 0) * 110ms); }
+  html.js:not(.shown) .tile.in .frame { clip-path: inset(0 round 8px); }
+  html.js:not(.shown) .tile:not(.in) .win, html.js:not(.shown) .tile:not(.in) .phone { translate: 0 12%; transition-delay: calc(var(--d, 0) * 110ms); }
+  /* scale, not transform, so the hover zoom in stage.css still works afterwards */
+  html.js:not(.shown) .tile .frame.cover > img { transition: transform 1.2s ease-out, scale 1.1s var(--ease); transition-delay: 0s, calc(var(--d, 0) * 110ms); }
+  html.js:not(.shown) .tile:not(.in) .frame.cover > img { scale: 1.08; }
+
+  html.js:not(.shown) .mark .ch { display: inline-block; transform: translateY(105%); transition: transform 1s var(--ease); transition-delay: calc(var(--d, 0) * 35ms); }
+  html.js:not(.shown) .mark.in .ch { transform: none; }
+}
+@keyframes rise-w { from { opacity: 0; transform: translateY(45%); } to { opacity: 1; transform: none; } }
+@keyframes rise { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: none; } }

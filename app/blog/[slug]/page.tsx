@@ -1,10 +1,10 @@
+import "../../home.css";
+import "../../case.css";
+import "../../blog.css";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Header } from "@/components/header";
-import { BlogRuntimeVisual } from "@/components/blog-runtime-visual";
-import { BlogArticleTools } from "@/components/blog-article-tools";
-import { formatPostDate, getAllPosts, getPost } from "@/lib/blog";
+import { formatMonthYear, formatPostDate, getAllPosts, getPost } from "@/lib/blog";
+import { ReadProgress } from "@/components/read-progress";
 import { StructuredData } from "@/components/structured-data";
 import { BLOG_ID, OG_IMAGE, PERSON_ID, SITE_NAME, SITE_URL, SOCIAL_LINKS, WEBSITE_ID, absoluteUrl, breadcrumbSchema } from "@/lib/site";
 
@@ -26,8 +26,7 @@ export default async function BlogPostPage({ params }: PageProps) {
   const post = getPost((await params).slug);
   if (!post) notFound();
   const posts = getAllPosts();
-  const currentIndex = posts.findIndex((item) => item.slug === post.slug);
-  const nextPost = posts[currentIndex + 1] ?? posts[currentIndex - 1];
+  const next = posts[posts.findIndex((p) => p.slug === post.slug) + 1];
   const articleUrl = absoluteUrl(`/blog/${post.slug}/`);
   const structuredData = {
     "@context": "https://schema.org",
@@ -51,26 +50,27 @@ export default async function BlogPostPage({ params }: PageProps) {
         isPartOf: { "@id": BLOG_ID },
         mainEntityOfPage: { "@type": "WebPage", "@id": articleUrl, isPartOf: { "@id": WEBSITE_ID } },
       },
-      breadcrumbSchema([{ name: "Home", path: "/" }, { name: "Field Notes", path: "/blog/" }, { name: post.title, path: `/blog/${post.slug}/` }]),
+      breadcrumbSchema([{ name: "Home", path: "/" }, { name: "Writings", path: "/blog/" }, { name: post.title, path: `/blog/${post.slug}/` }]),
     ],
   };
 
-  return <><Header /><main className="article-page">
-    <StructuredData data={structuredData} />
-    <section className="article-hero section-shell">
-      <div className="article-breadcrumb" data-hero-fade><Link href="/blog">Field notes</Link><span>/</span><span>{post.category}</span></div>
-      <div className="article-meta" data-hero-fade><span>{formatPostDate(post.publishedAt)}</span><span>{post.readingTime} MIN READ</span><span>NO. {String(currentIndex + 1).padStart(3, "0")}</span></div>
-      <h1 className="article-title"><span className="line-mask"><span data-hero-line>{post.title}</span></span></h1>
-      <p className="article-deck" data-hero-fade>{post.summary}</p>
-      <div className="article-author" data-hero-fade><div>PO</div><p><strong>Promise Okafor</strong><span>Senior frontend engineer · Building across web, mobile and desktop</span></p></div>
-    </section>
-    <div className="article-cover section-shell" data-reveal><BlogRuntimeVisual compact /></div>
-    <section className="article-layout section-shell">
-      <aside className="article-toc" data-reveal><span>IN THIS NOTE</span><nav aria-label="Table of contents">{post.toc.map((item) => <a className={item.level === 3 ? "is-nested" : ""} href={`#${item.id}`} key={item.id}>{item.title}</a>)}</nav><BlogArticleTools title={post.title} /></aside>
-      <article className="article-prose" dangerouslySetInnerHTML={{ __html: post.html }} />
-      <aside className="article-rail" aria-label="Article details" data-reveal><span>TOPICS</span>{post.tags.map((tag) => <p key={tag}>{tag}</p>)}</aside>
-    </section>
-    <section className="article-author-card section-shell" data-reveal><div>PO</div><div><span>WRITTEN BY</span><h2>Promise Okafor</h2><p>I design and ship frontend systems, lead product engineering work, and write about the decisions that make interfaces dependable.</p></div><Link className="text-link" href="/#contact">Work with me <span>↗</span></Link></section>
-    <section className="article-next">{nextPost ? <Link className="section-shell" href={`/blog/${nextPost.slug}`}><span>READ NEXT</span><strong>{nextPost.title}</strong><i aria-hidden="true">↗</i></Link> : <Link className="section-shell" href="/blog"><span>RETURN TO</span><strong>Field notes.</strong><i aria-hidden="true">↗</i></Link>}</section>
-  </main></>;
+  return (
+    <>
+      <StructuredData data={structuredData} />
+      <ReadProgress />
+      <div className="case post wrap">
+        {/* a plain anchor, not next/link, so the cross-document view transition fires */}
+        {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+        <a className="back" href="/blog/">Back to writings</a>
+        <h1 className="post-title">{post.title}</h1>
+        <p className="meta"><time dateTime={post.publishedAt}>{formatPostDate(post.publishedAt)}</time>, {post.readingTime} min read</p>
+        <article dangerouslySetInnerHTML={{ __html: post.html }} />
+      </div>
+      {next && (
+        <ul className="posts post-next">
+          <li><a href={`/blog/${next.slug}/`}><h3>{next.title}</h3><span>Next</span><span>{formatMonthYear(next.publishedAt)}</span></a></li>
+        </ul>
+      )}
+    </>
+  );
 }

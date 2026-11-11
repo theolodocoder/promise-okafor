@@ -1,0 +1,22 @@
+/* screenshot stage: a photo backdrop with app windows and phones set on it.
+   Shared by the work tiles, case studies and posts. */
+.frame { position: relative; aspect-ratio: 16 / 9; border-radius: 8px; overflow: hidden; background: var(--t-grey); }
+.frame::before { content: ""; position: absolute; inset: 0; background: var(--bd) center / cover; transition: transform 1.2s ease-out; }
+a:hover > .frame::before, a:focus-visible > .frame::before { transform: scale(1.04); }
+.bd-sky { --bd: url(/stage/sky.jpg); } .bd-cream { --bd: url(/stage/cream.jpg); } .bd-mist { --bd: url(/stage/mist.jpg); } .bd-lavender { --bd: url(/stage/lavender.jpg); }
+.win, .phone { position: absolute; overflow: hidden; background: var(--paper); box-shadow: 0 0 0 1px rgba(11, 18, 32, .08), 0 50px 100px -40px rgba(15, 23, 42, .6); transition: translate 1.1s var(--ease); }
+.win { left: 7%; top: 11%; right: 0; bottom: 0; border-radius: 12px 0 0 0; display: grid; place-items: center; }
+.win img { width: 100%; height: 100%; object-fit: cover; object-position: top left; display: block; }
+.phone { left: 50%; top: 12%; width: 27%; margin-left: -13.5%; border-radius: 22px 22px 0 0; }
+.phone img { width: 100%; display: block; }
+.trio .win { right: auto; width: 60%; left: 4%; top: 12%; border-radius: 12px 12px 0 0; }
+.trio .win.b { left: 46%; top: 30%; width: 62%; border-radius: 12px 0 0 0; }
+figure.stage { margin-left: -24%; } figure.stage .frame { aspect-ratio: 16 / 8; } figure.stage .phone { width: 22%; margin-left: -11%; }
+.frame.cover::before { display: none; }
+.frame.cover > img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 1.2s ease-out; }
+a:hover > .frame.cover > img, a:focus-visible > .frame.cover > img { transform: scale(1.04); }
+@media (max-width: 800px) { figure.stage { margin-left: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .frame::before, .frame.cover > img, .win, .phone { transition: none; }
+  a:hover > .frame::before, a:focus-visible > .frame::before, a:hover > .frame.cover > img, a:focus-visible > .frame.cover > img { transform: none; }
+}

@@ -12,6 +12,7 @@ export type BlogPostMeta = {
   featured: boolean;
   readingTime: number;
   wordCount: number;
+  draft: boolean;
 };
 
 export type BlogPost = BlogPostMeta & {
@@ -47,10 +48,10 @@ function renderInline(value: string) {
   });
 
   rendered = rendered
-    .replace(/!\[([^\]]*)\]\(([^\s)]+)(?:\s+&quot;([^&]*)&quot;)?\)/g, (_, alt: string, source: string) => `<img src="${escapeHtml(safeUrl(source))}" alt="${alt}" loading="lazy" />`)
+    .replace(/!\[([^\]]*)\]\(([^\s)]+)(?:\s+&quot;([^&]*)&quot;)?\)/g, (_, alt: string, source: string) => `<img src="${safeUrl(source)}" alt="${alt}" loading="lazy" />`)
     .replace(/\[([^\]]+)\]\(([^\s)]+)\)/g, (_, label: string, source: string) => {
       const external = /^https?:\/\//i.test(source) ? ' target="_blank" rel="noreferrer"' : "";
-      return `<a href="${escapeHtml(safeUrl(source))}"${external}>${label}</a>`;
+      return `<a href="${safeUrl(source)}"${external}>${label}</a>`;
     })
     .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
     .replace(/(^|\s)\*([^*]+)\*/g, "$1<em>$2</em>")
@@ -59,8 +60,10 @@ function renderInline(value: string) {
   return rendered;
 }
 
+const backdrops = ["sky", "cream", "mist", "lavender"];
+
 function isBlockStart(line: string) {
-  return /^(#{2,3})\s+|^```|^>\s?|^[-*]\s+|^\d+\.\s+|^---$|^!\[/.test(line);
+  return /^(#{2,3})\s+|^```|^>\s?|^[-*]\s+|^\d+\.\s+|^---$|^!\[|^<figure/.test(line);
 }
 
 export function renderMarkdown(markdown: string) {
@@ -113,6 +116,24 @@ export function renderMarkdown(markdown: string) {
       continue;
     }
 
+    if (line.startsWith("<figure")) {
+      const figure: string[] = [];
+      // an unclosed <figure> ends at the first blank line instead of swallowing the rest of the document
+      while (index < lines.length && lines[index].trim()) { figure.push(lines[index].trimEnd()); index += 1; if (figure[figure.length - 1].includes("</figure>")) break; }
+      html.push(figure.join("\n"));
+      continue;
+    }
+
+    const image = line.match(/^!\[([^\]]*)\]\(([^\s)]+)(?:\s+"([^"]*)")?\)$/);
+    if (image) {
+      const words = (image[3] ?? "").split(/\s+/);
+      const backdrop = words.find((word) => backdrops.includes(word)) ?? "sky";
+      const device = words.includes("phone") ? "phone" : "win";
+      html.push(`<figure class="stage"><div class="frame bd-${backdrop}"><div class="${device}"><img src="${escapeHtml(safeUrl(image[2]))}" alt="" loading="lazy" /></div></div><figcaption>${escapeHtml(image[1])}</figcaption></figure>`);
+      index += 1;
+      continue;
+    }
+
     if (/^!\[/.test(line)) { html.push(`<figure>${renderInline(line)}</figure>`); index += 1; continue; }
 
     const paragraph = [line.trim()];
@@ -124,7 +145,7 @@ export function renderMarkdown(markdown: string) {
   return html.join("\n");
 }
 
-function parseFrontmatter(source: string) {
+export function parseFrontmatter(source: string) {
   if (!source.startsWith("---\n")) return { attributes: new Map<string, string>(), content: source };
   const end = source.indexOf("\n---\n", 4);
   if (end === -1) return { attributes: new Map<string, string>(), content: source };
@@ -165,6 +186,7 @@ function parsePost(fileName: string): BlogPost {
     category: attributes.get("category") ?? "Engineering",
     tags: (attributes.get("tags") ?? "").replace(/^\[|\]$/g, "").split(",").map((tag) => tag.trim()).filter(Boolean),
     featured: attributes.get("featured") === "true",
+    draft: attributes.get("draft") === "true",
     readingTime: Math.max(1, Math.ceil(words / 210)),
     wordCount: words,
     content,
@@ -175,12 +197,20 @@ function parsePost(fileName: string): BlogPost {
 
 export function getAllPosts() {
   if (!fs.existsSync(postsDirectory)) return [];
-  return fs.readdirSync(postsDirectory).filter((file) => file.endsWith(".md")).map(parsePost).sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt));
+  return fs.readdirSync(postsDirectory).filter((file) => file.endsWith(".md")).map(parsePost).filter((post) => !(post.draft && process.env.NODE_ENV === "production")).sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt));
 }
 
 export function getPost(slug: string) {
   const fileName = `${slug}.md`;
-  return fs.existsSync(path.join(postsDirectory, fileName)) ? parsePost(fileName) : undefined;
+  if (!fs.existsSync(path.join(postsDirectory, fileName))) return undefined;
+  const post = parsePost(fileName);
+  return post.draft && process.env.NODE_ENV === "production" ? undefined : post;
+}
+
+// writing rows (home, index, next post) show month and year
+const monthYear = new Intl.DateTimeFormat("en", { month: "short", year: "numeric", timeZone: "UTC" });
+export function formatMonthYear(value: string) {
+  return monthYear.format(new Date(value));
 }
 
 export function formatPostDate(value: string) {

@@ -1,6 +1,6 @@
 ---
 title: Building Paje to understand what frameworks hide
-summary: A close look at the tiny reactive UI runtime I am building—from hyperscript and action dispatch to DOM lifecycle, deliberate constraints, and the lessons hiding beneath familiar abstractions.
+summary: A close look at the tiny reactive UI runtime I am building, from hyperscript and action dispatch to DOM lifecycle, deliberate constraints, and the lessons hiding beneath familiar abstractions.
 publishedAt: 2026-07-17T09:00:00+01:00
 updatedAt: 2026-07-17T09:00:00+01:00
 category: Engineering notes
@@ -8,7 +8,7 @@ tags: [JavaScript, Runtime Architecture, Virtual DOM, Frontend]
 featured: true
 ---
 
-Frameworks make frontend work feel wonderfully direct. State changes, the view follows, and a large amount of machinery stays out of sight. That convenience is valuable—but after years of shipping products with mature tools, I wanted to inspect the machinery for myself.
+Frameworks make frontend work feel wonderfully direct. State changes, the view follows, and a large amount of machinery stays out of sight. That convenience is valuable, but after years of shipping products with mature tools, I wanted to inspect the machinery for myself.
 
 Paje is the result: a small reactive UI runtime written in vanilla JavaScript. It is not an attempt to replace React, Angular, or Vue. It is a focused engineering exercise in making the hidden contracts of a UI framework explicit: how state moves, how actions become updates, how a view becomes DOM, and how every listener and node is cleaned up again.
 
@@ -43,7 +43,7 @@ There are only three ideas to hold at once:
 
 That API is small because the runtime carries the coordination burden. Calling `emit("increment")` dispatches an action, the matching reducer returns new state, and an after-dispatch hook renders the next view.
 
-The public contract was the first architecture decision. Before building internals, I wanted to know what the runtime promised its caller—and just as importantly, what it did not promise.
+The public contract was the first architecture decision. Before building internals, I wanted to know what the runtime promised its caller, and just as importantly, what it did not promise.
 
 ## The architecture is a loop
 
@@ -98,7 +98,7 @@ Choosing plain objects also makes the abstraction observable. You can log a Paje
 
 ## Rendering and ownership
 
-The renderer switches on three node types—text, element, and fragment—and delegates each to a small mounting function. Element mounting creates a real DOM node, applies attributes and listeners, recursively mounts children, then appends the result to its parent.
+The renderer switches on three node types (text, element, and fragment) and delegates each to a small mounting function. Element mounting creates a real DOM node, applies attributes and listeners, recursively mounts children, then appends the result to its parent.
 
 Every virtual node keeps a reference to the real node it created. Event handlers are stored as well. Those references make unmounting deterministic:
 
@@ -109,7 +109,7 @@ Every virtual node keeps a reference to the real node it created. Event handlers
 
 This is one of the strongest lessons from the project: **lifecycle is an ownership problem**. Creating a node is only half of a renderer. A reliable system must also know who owns the resources created along the way and how that ownership ends.
 
-It is easy to demo a click handler. It is harder—and more representative of production engineering—to ensure the handler does not survive the interface that created it.
+It is easy to demo a click handler. It is harder, and more representative of production engineering, to ensure the handler does not survive the interface that created it.
 
 ## The deliberate limitation
 
@@ -182,7 +182,7 @@ When those boundaries are visible, a system can grow without turning every new f
 
 Paje is deliberately small, but the questions it exposes are the same ones that matter in large frontend platforms: identity, ownership, predictability, scheduling, and the cost of abstraction.
 
-That is why I am building it. Not because the ecosystem needs another logo—but because understanding the loop makes me better at designing the systems teams depend on every day.
+That is why I am building it. Not because the frontend world needs another logo, but because understanding the loop makes me better at designing the systems teams depend on every day.
 
 ---
 
