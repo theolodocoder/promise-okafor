@@ -24,8 +24,8 @@
   html.js:not(.shown) .tile.in .frame { clip-path: inset(0 round 8px); }
   html.js:not(.shown) .tile:not(.in) .win, html.js:not(.shown) .tile:not(.in) .phone { translate: 0 12%; transition-delay: calc(var(--d, 0) * 110ms); }
   /* scale, not transform, so the hover zoom in stage.css still works afterwards */
-  html.js:not(.shown) .tile .frame.cover > img { transition: transform 1.2s ease-out, scale 1.1s var(--ease); transition-delay: 0s, calc(var(--d, 0) * 110ms); }
-  html.js:not(.shown) .tile:not(.in) .frame.cover > img { scale: 1.08; }
+  html.js:not(.shown) .tile .frame.cover img { transition: transform 1.2s ease-out, scale 1.1s var(--ease); transition-delay: 0s, calc(var(--d, 0) * 110ms); }
+  html.js:not(.shown) .tile:not(.in) .frame.cover img { scale: 1.08; }
 
   html.js:not(.shown) .mark .ch { display: inline-block; transform: translateY(105%); transition: transform 1s var(--ease); transition-delay: calc(var(--d, 0) * 35ms); }
   html.js:not(.shown) .mark.in .ch { transform: none; }

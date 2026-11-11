@@ -119,7 +119,7 @@ const pages = [
         eyebrow: `<b>${esc(work.field)}</b>${work.parent ? ", JobWhisper" : ""}`,
         title: esc(work.title),
         line: work.line,
-        aside: cover ? `<div class="card"><img src="${file(`public${cover}`)}" alt=""></div>` : "",
+        aside: cover ? `<div class="card"><img src="${file(`images${cover}`)}" alt=""></div>` : "",
         label: "<i>Case study</i>",
       }),
     };

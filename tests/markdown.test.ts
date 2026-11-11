@@ -12,10 +12,16 @@ test("an unclosed figure stops at the first blank line", () => {
   assert.ok(html.includes("<p>After <strong>this</strong>.</p>")); assert.ok(html.includes('<h2 id="next">Next</h2>'));
 });
 test("a block image becomes a screenshot stage", () => {
-  assert.ok(renderMarkdown('![The Cosella website](/work/cosella.jpg "mist")').includes('<figure class="stage"><div class="frame bd-mist"><div class="win"><img src="/work/cosella.jpg" alt="" loading="lazy" /></div></div><figcaption>The Cosella website</figcaption></figure>'));
-  assert.ok(renderMarkdown('![Copilot](/work/copilot.jpg "lavender phone")').includes('<div class="frame bd-lavender"><div class="phone"><img src="/work/copilot.jpg" alt="" loading="lazy" /></div></div>'));
-  assert.ok(renderMarkdown("![Plain](/a.jpg)").includes('<div class="frame bd-sky"><div class="win">'));
+  const sizes = "(max-width: 800px) 100vw, 840px";
+  assert.ok(renderMarkdown('Intro.\n\n![The Cosella website](/work/cosella.jpg "mist")').includes(`<figure class="stage"><div class="frame bd-mist"><div class="win"><picture><source type="image/avif" srcset="/work/cosella.640.avif 640w, /work/cosella.960.avif 960w, /work/cosella.1100.avif 1100w" sizes="${sizes}" /><source type="image/webp" srcset="/work/cosella.640.webp 640w, /work/cosella.960.webp 960w, /work/cosella.1100.webp 1100w" sizes="${sizes}" /><img src="/work/cosella.960.jpg" alt="" width="1100" height="618" loading="lazy" decoding="async" /></picture></div></div><figcaption>The Cosella website</figcaption></figure>`));
+  assert.ok(renderMarkdown('Intro.\n\n![Copilot](/work/copilot.jpg "lavender phone")').includes('<div class="frame bd-lavender"><div class="phone"><picture><source type="image/avif" srcset="/work/copilot.414.avif 414w" sizes="(max-width: 800px) 27vw, 190px" />'));
+  assert.ok(renderMarkdown("![Plain](/a.jpg)").includes('<div class="frame bd-sky"><div class="win"><img src="/a.jpg" alt="" fetchpriority="high" /></div>'));
   assert.ok(renderMarkdown('![Odd](/a.jpg "neon")').includes('<div class="frame bd-sky"><div class="win">'));
+});
+test("only a stage that opens the document loads eagerly", () => {
+  const first = renderMarkdown('![Lead](/work/cosella.jpg)\n\n![Later](/work/cosella.jpg)');
+  assert.equal(first.match(/fetchpriority="high"/g)?.length, 1);
+  assert.ok(first.indexOf('fetchpriority="high"') < first.indexOf('loading="lazy"'));
 });
 test("other raw html is still escaped", () => {
   assert.ok(renderMarkdown("<script>alert(1)</script>").includes("&lt;script&gt;"));

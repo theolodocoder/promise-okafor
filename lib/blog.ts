@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { SIZES, pictureHtml } from "./picture.ts";
 
 export type BlogPostMeta = {
   slug: string;
@@ -129,7 +130,8 @@ export function renderMarkdown(markdown: string) {
       const words = (image[3] ?? "").split(/\s+/);
       const backdrop = words.find((word) => backdrops.includes(word)) ?? "sky";
       const device = words.includes("phone") ? "phone" : "win";
-      html.push(`<figure class="stage"><div class="frame bd-${backdrop}"><div class="${device}"><img src="${escapeHtml(safeUrl(image[2]))}" alt="" loading="lazy" /></div></div><figcaption>${escapeHtml(image[1])}</figcaption></figure>`);
+      // a study that opens on a stage: that screenshot is the first thing on screen, so it loads first
+      html.push(`<figure class="stage"><div class="frame bd-${backdrop}"><div class="${device}">${pictureHtml(escapeHtml(safeUrl(image[2])), "", device === "phone" ? SIZES.figurePhone : SIZES.figure, html.length === 0)}</div></div><figcaption>${escapeHtml(image[1])}</figcaption></figure>`);
       index += 1;
       continue;
     }

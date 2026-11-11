@@ -41,8 +41,12 @@ export default async function WorkPage({ params }: PageProps) {
   const parent = project.parent ? getWork(project.parent) : undefined;
   const children = getChildWorks(project.slug);
   // a study that opens on a screenshot stage: fetch its backdrop and screenshot with the page, not after the CSS and layout
-  const lead = project.html.match(/^<figure class="stage"><div class="frame bd-(\w+)"><div class="\w+"><img src="([^"]+)"/);
-  if (lead) { preload(`/stage/${lead[1]}.jpg`, { as: "image" }); preload(lead[2], { as: "image" }); }
+  // the screenshot preload names the same AVIF srcset and sizes the <picture> uses, so the browser fetches one file once
+  const lead = project.html.match(/^<figure class="stage"><div class="frame bd-(\w+)"><div class="\w+"><picture><source type="image\/avif" srcset="([^"]+)" sizes="([^"]+)"/);
+  if (lead) {
+    preload(`/stage/${lead[1]}.avif`, { as: "image", type: "image/avif" });
+    preload(lead[2].split(" ")[0], { as: "image", type: "image/avif", imageSrcSet: lead[2], imageSizes: lead[3], fetchPriority: "high" });
+  }
 
   const projectUrl = absoluteUrl(`/work/${project.slug}/`);
   const crumbs = [{ name: "Home", path: "/" }, { name: "Work", path: "/#works" }, ...(parent ? [{ name: parent.title, path: `/work/${parent.slug}/` }] : []), { name: project.title, path: `/work/${project.slug}/` }];
