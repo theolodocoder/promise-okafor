@@ -1,6 +1,6 @@
 ---
 title: The meeting notetaker
-subtitle: A new product line in about six days, and the choices that kept it safe to ship.
+subtitle: Two ways to take meeting notes, built in about six days.
 line: Notes and answers for the meetings you are in, with a bot or without one.
 field: Product
 year: 2024 to 2026
@@ -20,11 +20,11 @@ It came in two forms. A meeting bot joins Google Meet, Zoom and Teams calls. A d
 
 ## The problem
 
-Other products already take meeting notes with a bot, so the question was how much to build before it could be trusted. A bot that records calls touches money, privacy and the other people on the call, and each can go wrong quietly.
+The question was how much to build before we could trust a bot with someone's meeting. A bot that records calls touches money, privacy and the other people on the call, and each can go wrong quietly.
 
 ## First, a fake bot
 
-I did not wait for the bot to exist. The first version of the server had a simulated bot that moved through joining, waiting, recording and processing on a clock. Everything around it was real: storage, credit checks, AI notes, sharing and the web app.
+I did not wait for the bot to exist. The first version of the server had a simulated bot that moved through joining, waiting, recording and processing on a clock. Storage, credit checks, AI notes, sharing and the web app all worked against it.
 
 Which bot to use was still open, and nothing else had to wait. A real bot only had to report the same status changes the fake one did, so swapping it in touched one small part.
 
@@ -40,9 +40,9 @@ Which bot to use was still open, and nothing else had to wait. A real bot only h
 
 ## The hard part
 
-Most of the work was not the notes. It was what goes wrong when a vendor's server and yours talk about a live call.
+The harder work was handling failures when a vendor's server and ours exchange updates about a live call.
 
-1. **Messages arrive out of order, twice, or early.** One can even arrive before our own request to create the bot has returned.
+1. **Messages arrive late, more than once, or early.** One can arrive before our own request to create the bot has returned.
 2. **Money moves on those messages.** A repeat message must not charge a second time, and a lost one must not charge never.
 3. **Anyone can post to a public address.** The webhook has to be public, so it has to prove who sent each message.
 
@@ -59,7 +59,7 @@ The company had a paid meeting-bot service by then. It handles joining, waiting 
 
 ### Verify every webhook
 
-Each message from the bot service carries an id, a timestamp and a signature. The server rebuilds the signature from the raw body with a shared secret and compares it in constant time. A message older than five minutes is refused, so a captured one cannot be replayed. During key rotation any one of several signatures may match.
+Each message from the bot service carries an id, a timestamp and a signature. The server rebuilds the signature from the raw body with a shared secret and compares it in constant time. A message older than five minutes is refused, which limits how long a captured one could be replayed. During key rotation any one of several signatures may match.
 
 If our own handling fails, the server answers with an error so the service retries. The log records the kind of error and never its text, because that text can echo the meeting link.
 
@@ -67,7 +67,7 @@ A status only moves forward. Joining, waiting, recording, processing, then ready
 
 ### Cap recording by credits
 
-Before a bot is sent, the server asks the credit meter how many minutes the balance covers, up to a hard cap of 180. The bot is created with that limit, so it leaves the call by itself when the minutes run out. The session remembers which of the two set the limit, so the list can say.
+Before a bot is sent, the server asks the credit meter how many minutes the balance covers, up to a hard cap of 180. The bot is created with that limit, so it leaves the call by itself when the minutes run out. The session records whether the balance or the 180-minute cap set the limit, so the list can say "out of credits" or "time cap".
 
 Charging happens once, when the transcript is ready. The minutes come from the vendor's own record of when the bot was in the call. A call that never recorded gets no notes and no charge, and a retried notes run cannot bill twice.
 
@@ -82,7 +82,7 @@ A double click or two open tabs can send two bots to the same call, and checking
 
 The bot service keeps the recording. We only need the words. So when the notes are saved, the server asks the service to delete the media. It does the same when a call is cancelled before it recorded, and when someone deletes a past call.
 
-The desktop recorder goes further. Audio streams to the server and is never written to disk or kept. Only the transcript and the notes remain.
+The desktop recorder goes further. Audio streams to the server and is never written to disk. Only the transcript and the notes are kept.
 
 ### A recorder with no bot
 
@@ -99,7 +99,7 @@ While a call records, the desktop panel shows subtitles and a box to ask about t
 
 ### What I cut
 
-The bot version has no live notes during the call and no chat commands. The desktop version has no notes pages of its own and opens the web page. Each cut is written down as a non-goal, so nobody thinks it was forgotten.
+The bot version has no live notes during the call and no chat commands. The desktop version has no notes pages of its own and opens the web page. We wrote the cuts down as non-goals so they would not look unfinished.
 
 ## Result
 
@@ -107,7 +107,7 @@ The bots were merged to the production branch on 30 October, two days after the 
 
 ## What was still wrong
 
-- **I found no record of a real Zoom or Teams call being tested.** The code handles them, but I only saw a real call on Meet.
+- **I found no record of a real Zoom or Teams call being tested.** The bot service supports them, but I only saw a real call on Meet.
 - **Meetings that admit only signed-in accounts** turned the guest bot away. We added a plain message for it, and later a way for the bot to sign in.
 - **Recording without a bot depends on a legal answer.** The specs held the release on it. The record does not tell me how it ended.
 - **A crash can leave up to a minute of desktop audio uncharged.**

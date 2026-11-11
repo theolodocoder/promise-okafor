@@ -19,23 +19,23 @@ Writers co-edit a chapter. Contributors propose changes and a reviewer compares 
 
 ## The problem
 
-Collaborative writing tools tend to fail in two quiet ways. They lose edits, or they merge two people's changes into one sentence nobody wrote. And the rule for who may do what ends up written twice, once in the API and once in the live layer, and the two slowly disagree.
+I focused on two problems. The first is lost edits, or two people's changes merged into one sentence nobody wrote. The second is the rule for who may do what being written twice, once in the API and once in the live layer, until the two disagree.
 
-The second one is the dangerous one. If the live socket forgets that somebody is only a reader, that person can type into the chapter anyway.
+An access check that lives only in the API leaves the live socket open. If the socket forgets that somebody is only a reader, that person can type into the chapter anyway.
 
 ## First, make the bad cases cheap to try
 
-Before I wrote the app I built small throwaway spikes for the three things I was least sure of: saving, proposals and access. Each one had to survive a nasty test.
+Before building the app, I tested the three parts I was least sure of, saving, proposals and access, as small separate experiments. Each one had to survive a nasty test.
 
 For saving, I ran two collab servers against one document. With a plain overwrite, 20 of 40 paragraphs were lost. With merge-on-write, all 40 were kept. After that the question of whether to merge on write was closed.
 
 For proposals, I generated about 172,000 random pairs of concurrent edits, with paragraph splits and joins in them, and checked every "clean" result against an independent merge.
 
-For access, I broke the code on purpose after the tests passed. Removing the database re-check made the right test fail. So did removing read-only enforcement and removing the revoke call. That showed me the tests were checking something.
+For access, I broke the code on purpose after the tests passed. Removing the database re-check made the right test fail. So did removing read-only enforcement and removing the revoke call. Those failures showed that the tests really caught a missing check.
 
 ## The hard part
 
-A document is shared by many people, so every rule has to be true on every path into it.
+Every way of changing a chapter has to enforce the same access rules.
 
 The test of it is simple. Give someone a valid ticket that says "edit", then make them a viewer. They must still not be able to write. And they must not be able to write by going around the API either.
 
@@ -60,7 +60,7 @@ if (capability === 'document.edit')
   return role !== null && DIRECT_WRITERS[effectiveMode(ctx)].has(role)
 ```
 
-The API calls it on every route. Collab calls it when a socket connects. The UI never decides anything: it only draws what `can()` said. I chose this because two copies of a rule drift, and one copy cannot.
+The API calls it on its routes. Collab calls it when a socket connects. The UI draws what `can()` said and does not make its own call. I chose this because with the rule in one place, both services check the same decision.
 
 When someone cannot even read a work, the API answers 404, so it never confirms that the work exists. When they can read it but lack the capability, it answers 403.
 
@@ -105,9 +105,9 @@ The call setup messages travel on the chapter's existing socket. Collab stamps e
 
 ## Result
 
-What exists today is the tests, and I am careful to say only that.
+Morrow is pre-release, so I can only judge it by what I built and tested, not by use.
 
-The integration tests run against a real Postgres, with a fresh database for each file, not mocks. The project rules say every permission rule needs a test. The end-to-end tests run in Playwright and check every screen they visit with axe against WCAG 2.2 AA. A separate Playwright run signs in twelve people, opens one chapter for all of them and types a few lines from each. It mainly captures the README screenshots, and its only checks are that the editor loads and shows Saved. So I do not count it as proof of scale.
+The integration tests run against a real Postgres, with a fresh database for each file, not mocks. The project rules say every permission rule needs a test. The end-to-end tests run in Playwright and run axe on every screen they visit, set to the WCAG 2.2 AA rules. A separate Playwright run signs in twelve people, opens one chapter for all of them and types a few lines from each. It mainly captures the README screenshots, and its only checks are that the editor loads and shows Saved. So I do not count it as proof of scale.
 
 After the main build I added tests for bad networks, and a patch to the editor so a letter typed beside the same letter stays the writer's.
 
@@ -119,4 +119,4 @@ The voice rooms have not been tried on strict networks.
 
 ## What I took from it
 
-The rule that must never be wrong should live in one place and be tested from every door. Writing the tests that try to break it first, then checking that they fail when I remove the check, told me more than the feature did.
+I learned to test the access rule by removing each check on purpose and seeing which tests went red. That told me more than the feature did.

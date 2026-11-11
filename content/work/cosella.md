@@ -19,31 +19,31 @@ I am the lead frontend engineer. I wrote the first commit of the frontend, so mo
 
 ## The problem
 
-A new team writes fast and decides slowly. Left alone, every screen gets its own way to call the API, check a permission, validate a form and show an error. A month later nobody can change one of those without touching twenty files.
+When a team starts building quickly, engineers end up solving the same problems in different ways. Left alone, every screen gets its own way to call the API, check a permission, validate a form and show an error. A month later nobody can change one of those without touching twenty files.
 
 The product also made mistakes costly. It runs during a live call, so a blank page or a wrong number is not a small annoyance for the person using it.
 
 ## How I started
 
-I did not start with screens. I started with the things every screen would need, in order, and I wrote each decision down so a new person could read why instead of asking.
+Before building screens, I set up the shared pieces every screen would need and wrote each decision down, so a new person could read why instead of asking.
 
 - A component library with its own previews and tests.
 - A shared app shell with a command palette, so every app navigates the same way.
 - Permissions as one function that answers "can this person do this", used everywhere instead of ad hoc role checks.
 - Forms with one way to validate.
-- Error tracking that catches every crash and redacts private data before it leaves the browser.
+- Error tracking that redacts private data before it leaves the browser.
 - An API client generated from the backend's contract, so the types come from the server and not from guessing.
 - Written architecture decisions, and a check before every push that type-checks and builds every app.
 
-The rule behind all of it: if the right way is also the easy way, people use it without being told.
+Each piece gave the team one documented way to handle a problem, so nobody had to invent their own.
 
 ## The hard part
 
-The foundation is invisible when it works, so the proof came from the bugs it caught. The best example was not in the frontend at all.
+The best example of why this matters was not in the frontend at all.
 
 One customer's live calls would not start. Every attempt failed. The AI provider rejected the setup request, saying the prompt was over its limit by 4 tokens. Worse, our app sent the same request again, three times, and got the same answer each time.
 
-There were two bugs in one. The prompt had a budget, but only the knowledge-base part of it, and the number was a round figure that happened to sit right at the edge for this customer. The static part of the prompt was never counted. And the server reported the failure as "service unavailable", which told the app to try again, when trying again could never work.
+There were two bugs. First, the prompt budget counted only the knowledge base, with a round number that sat right at the edge for this customer, and never counted the fixed instructions. Second, the server reported the failure as "service unavailable", which told the app to try again when trying again could never work.
 
 ## Decisions and tradeoffs
 
@@ -68,9 +68,9 @@ For this customer that kept 52,705 of their 60,423 characters of knowledge, so 8
 
 ### Let the provider count for us
 
-My character-based estimate can never be exact, because URLs and code split into many more tokens than plain sentences do. But when the provider rejects a prompt it says exactly how many tokens it counted. That is a free, accurate counter.
+My character-based estimate can never be exact, because URLs and code split into many more tokens than plain sentences do. But when the provider rejects a prompt it says exactly how many tokens it counted, which is the real usage and not an estimate.
 
-So if a prompt is still rejected, the server uses that number to work out the real ratio, trims again and tries once more. One retry is enough, because the second attempt is based on a measurement and not a guess. I also kept the estimate generous on purpose, so a normal knowledge base is not cut down just to be safe.
+So if a prompt is still rejected, the server uses that number to work out the real ratio, trims again and tries once more. The second attempt rests on a measurement and not a guess. I also kept the estimate generous on purpose, so a normal knowledge base is not cut down just to be safe.
 
 ### Make the error honest
 
@@ -82,17 +82,17 @@ I wrote tests against the real prompt builder and not a stand-in, including one 
 
 The same care showed up in smaller places, each one found by reading what the code really did.
 
-- **Data leaking between workspaces.** Some cached data was not tied to a workspace, so after a switch the previous workspace's financial ledger showed up. Everything is now keyed by workspace.
+- **Data leaking between workspaces.** Some cached data was not tied to a workspace, so after a switch the previous workspace's financial ledger showed up. That data is now keyed by workspace.
 - **A permission check that let a manager see calls they should not.** It treated "no team" on both sides as a match. It now needs a real team on both.
-- **Two refreshes at once.** Two requests could each renew the login, and the second one cancelled the first, so the user was logged out. Now they share one refresh, and a network blip no longer logs anyone out, only a real "no" from the server does. I also closed an open redirect on the return-after-login link.
+- **Two refreshes at once.** Two requests could each renew the login, and the second one cancelled the first, so the user was logged out. Now they share one refresh, and only a real "no" from the server logs anyone out, not a network blip. I also closed an open redirect on the return-after-login link.
 - **Money display.** Amounts dropped their cents, so $1,234.50 showed as $1,234.5. A CSV import let quoted commas shift columns. Both are fixed and covered by tests.
 - **The marketing page.** I cut it to about 1.2 kB of JavaScript, and later shrank the logo images from about 180 KB to 23 KB.
 
 ## Result
 
-That customer's prompt now fits under the limit, and the same mistake cannot repeat quietly, because the whole prompt now has a budget and the error tells the app the truth. The tests behind it ran against the real prompt builder.
+That customer's prompt now fits under the limit. The whole prompt now has a budget, the error tells the app the truth, and a test fails if the old budget comes back. The tests ran against the real prompt builder.
 
-The foundation is the larger result. The rest of the team builds on one set of pieces for permissions, forms, errors and API calls, and the decisions behind them are written down.
+The shared components, API client and written decisions gave the team a common starting point across the apps.
 
 ## What was still wrong
 

@@ -8,7 +8,7 @@ featured: false
 draft: false
 ---
 
-When a design system has to serve a web app and a native app, the first thing people share is components. We shared something smaller. The web apps and the React Native app share the design's numbers, and each side builds its own components from them. The part of that I want to write about is one number, because it was the decision I was most tempted to get wrong.
+We needed our web apps and our React Native app to look like one product, but components could not be shared between them. So we shared the design's numbers instead, and each side builds its own components from them. The hard decision was one of those numbers, a root font size of 90%, and it was the one I was most tempted to get wrong.
 
 ## Why the components are not shared
 
@@ -16,9 +16,9 @@ The browser components are React, built on Base UI for the accessible behavior. 
 
 What both sides can read is the values. Colors, type sizes, corner radii. The browser reads them from a CSS file. React Native reads the same values from a plain TypeScript file. A test checks that the two files agree, and that the important color pairs still pass the contrast rules.
 
-We also made it hard to go around them. A scan fails the build if a raw color shows up anywhere outside those two files. So when a designer changes a color, it changes in one place.
+We also made it hard to go around them. A scan fails the build if a raw color shows up anywhere outside those two files. So when a designer changes a color, it changes in those two files, and the test keeps them matching.
 
-That part went smoothly. The next part is where the real decision was.
+Sharing the values was the easy part. Getting their sizes right was harder.
 
 ## The design was drawn at 90%
 
@@ -32,15 +32,15 @@ html {
 
 The usual move is to convert. Keep the root at 16 and multiply the design's values by 0.9. Our first pass did exactly that, and only for type and corner radius, because those were the two scales we were looking at.
 
-It looked right for a while. The problem was everything we did not convert. Tailwind's spacing scale, its container widths, its default radii, and every rem written by hand during the port still held the design's own values. Under a 16px root, each of them rendered 11.1% larger than the design.
+Type and corner radius looked right. The problem was everything we did not convert. Tailwind's spacing scale, its container widths, its default radii, and every rem written by hand during the port still held the design's own values. Under a 16px root, each of them rendered 11.1% larger than the design.
 
-Nobody would have filed that as a bug. The page would just feel slightly loose, in a way no one could point to.
+Nobody would have filed that as a bug. The spacing and containers were just 11.1% bigger than drawn, and the page felt slightly loose in a way no one could point to.
 
 ## Match the root, do not convert the values
 
 We stopped converting. We set the root to 90% and kept every rem exactly as the design wrote it.
 
-The reason is simple. A conversion has to be remembered at every value, forever. Tailwind's built-in utilities are not in our token file at all, so there is nowhere to apply a conversion even if you wanted to. Matching the root fixes all of them at once, including the ones no token override can reach. The numbers in our code are now the same numbers the designer wrote, so anyone comparing the two sees no difference.
+A conversion has to be remembered at every value, forever. Tailwind's built-in utilities are not in our token file at all, so there is nowhere to apply a conversion even if you wanted to. Matching the root fixes all of them at once, including the ones no token override can reach. The numbers in our code are now the same numbers the designer wrote, so anyone comparing the two sees no difference.
 
 I used a percentage and not a pixel value on purpose. If a reader raises their browser's default text size, they still get 90% of their size. The page keeps scaling with them.
 
@@ -59,11 +59,11 @@ Some small controls went under the line altogether. On the desktop app, a compac
 
 And on phones in a browser, iOS Safari zooms the page when you focus any text field under 16px. With a 90% root, even our base text size computes to 14.4. So every text input now pins a literal 16px on small screens and keeps the design's own scale above that.
 
-None of these were a reason to go back. Each one was a visible, local problem we could name and fix. The 11.1% drift was invisible and everywhere.
+None of these were a reason to go back. Each one was a visible, local problem we could name, and we fixed all but the body text, which waits on the designer. The 11.1% drift was invisible and everywhere.
 
 ## How we keep it honest
 
-A decision like this rots unless the repository defends it. Three things hold it in place.
+A decision like this rots unless the repository defends it. Three things help hold it in place.
 
 The parity test fails if the native pixel values and the CSS rems stop describing the same rendered size. The raw-color scan fails the build if someone writes a hex code outside the token files. And the tokens doc says in plain words what the root is, why, and what it costs, so the next person to touch it does not "fix" the 90% back to 100%.
 
@@ -71,4 +71,4 @@ One gap is still open. The dark palette lives in two CSS blocks that have to sta
 
 ## What I took from it
 
-When a design and your platform disagree about a base unit, change the base, not every value that depends on it. Then write down what that choice costs, because the cost will not go away just because you chose it.
+We kept the 90% root. It cost us smaller body text, a few controls that needed explicit sizes and a 16px rule for inputs on phones, and all of it is written down where the next person will find it. When a design and your platform disagree about a base unit, I would change the base again, not every value that depends on it.

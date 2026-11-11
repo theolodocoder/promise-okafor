@@ -15,23 +15,23 @@ grip.ng is the public site of a gift-card and bill-payment product in Nigeria, r
 
 ## The problem
 
-The old site was an Angular app that drew everything in the browser. It also carried Bootstrap, jQuery, an animation library and an old icon font. To a search crawler, every page was an empty shell. The page also had a list of more than 150 keywords that nobody reads.
+The old site was an Angular app that drew everything in the browser. It also carried Bootstrap, jQuery, an animation library and an old icon font. Because the browser built every page, a search crawler got an empty HTML shell. The site also had a list of more than 150 keywords that nobody reads.
 
-The brief I wrote for myself was simple. Same pages, same words, same behaviour. Nothing added and nothing removed. The pages had to arrive as finished HTML, and they had to stay light.
+The rebuild had to keep the same pages, the same words and the same behaviour, with nothing added and nothing removed. Every page had to arrive as finished HTML, and stay light.
 
 ## How I measured it
 
-I used Lighthouse, on a mobile profile with simulated throttling, run in CI against all nine marketing pages. I set budgets that fail the build: performance at 0.9 or more, search at 1, accessibility at 0.95 or more.
+I ran Lighthouse in CI against all nine marketing pages, on a mobile profile with simulated throttling. I set budgets that fail the build: performance at 0.9 or more, search at 1, accessibility at 0.95 or more.
 
 That mattered early. I added scroll animations to every page, and performance dropped to between 0.79 and 0.88 on all nine. Before I trusted that, I stashed the change and ran again. The clean version scored 0.96, so it was not noise.
 
-For layout and accessibility I wrote one sweep. It visits every page at 360, 768, 1280 and 1440 pixels wide. At each width it checks that the page loads, that there is exactly one main heading, that nothing scrolls sideways, that the browser console is quiet, and that an accessibility scanner (axe, against WCAG 2.2 AA) finds nothing. At 360 it also checks that every tap target is at least 44 pixels tall.
+For layout and accessibility I wrote a single test that visits every page at 360, 768, 1280 and 1440 pixels wide. At each width it checks that the page loads, that there is exactly one main heading, that nothing scrolls sideways, that the browser console is quiet, and that an accessibility scanner (axe, against WCAG 2.2 AA) finds nothing. At 360 it also checks that every tap target is at least 44 pixels tall.
 
 ## The hard part
 
-Nothing on the page was big. The weight came from small things that each looked fair. A form validation library loaded on every page because the API client was built in the root layout. A data-fetching provider wrapped the whole site although only one calculator used it. A menu library shipped two menus most visitors never open.
+The extra JavaScript came from small things that loaded on every page and each looked fair. A form validation library loaded on every page because the API client was built in the root layout. A data-fetching provider wrapped the whole site although only one calculator used it. A menu library shipped two menus most visitors never open.
 
-Every one of them was defensible alone. Together they were a lot of JavaScript to download and run before anything could paint.
+Each one made sense alone. Together they were a lot of JavaScript to download and run before anything could paint.
 
 <figure class="wide">
 <div class="key"><span><i class="a"></i>Less JavaScript on every page, gzip</span></div>
@@ -48,7 +48,7 @@ Every one of them was defensible alone. Together they were a lot of JavaScript t
 
 ### Load a menu when someone reaches for it
 
-For the header menus and the calculator dropdowns I did not drop the library. I drew a look-alike button with the same classes and markup, and it fetches the real component when the pointer comes near, on focus, or on touch. Then it swaps in the real one, already open. Escape, the focus trap and focus return all work the same, because from that point it is the same menu.
+I kept the menu library for the header menus and the calculator dropdowns, but loaded it only when someone reaches for a menu. I drew a look-alike button with the same classes and markup, and it fetches the real component when the pointer comes near, on focus, or on touch. Then it swaps in the real one, already open. Escape, the focus trap and focus return all work the same, because from that point it is the same menu.
 
 > **What it cost**
 > More code to keep in step. The look-alike has to match the real trigger, and the tests have to look the trigger up again after the first press because the real one replaces it.
@@ -67,7 +67,7 @@ The home page had a strip of 36 card logos. Each used a fill-the-box image mode,
 
 I wrote this in the plan before the sweep existed: do not disable an axe rule, do not widen the scroll tolerance, do not allow-list a console error. Every finding gets fixed in the component.
 
-I also made each new check prove it can fail. I removed a placeholder and watched the test go red. I put two small buttons next to each other and watched the target-size rule catch them. Then I put things back. A test that has never failed has not shown me anything.
+I also made each new check prove it can fail. I removed a placeholder and watched the test go red. I put two small buttons next to each other and watched the target-size rule catch them. Then I put things back.
 
 ### What I chose not to build
 
@@ -88,7 +88,7 @@ The home page is 181 KB of HTML, down from 254 KB, and the JavaScript every page
 <figcaption>Home HTML is from the commit message. The Lighthouse rows are the animation test, not a final score.</figcaption>
 </figure>
 
-The checks run on every pull request.
+The checks below run on every pull request. The Lighthouse budgets are not among them any more.
 
 <figure class="wide">
 <div class="flow">
@@ -100,13 +100,13 @@ The checks run on every pull request.
 <figcaption>The pipeline, as it runs on every pull request and on pushes to main.</figcaption>
 </figure>
 
-The sweep found real things. The menu library hid the rest of the page from screen readers whenever a menu was open, in three different menus. One detail page scrolled sideways because a long reference would not wrap. An empty tab panel was a place for keyboard focus to get stuck. It also caught a mismatch between the server HTML and the first browser render, because one component checked the reduced-motion setting on its first draw. When I widened the scan to the newer WCAG 2.2 rules it found nothing, which I wrote down as it was.
+The sweep found real things. The menu library hid the rest of the page from screen readers whenever a menu was open, in three different menus. One detail page scrolled sideways because a long reference would not wrap. An empty tab panel was a place for keyboard focus to get stuck. It also caught a mismatch between the server HTML and the first browser render, because one component checked the reduced-motion setting on its first draw. The scan first ran on the older rules. When I widened it to WCAG 2.1 and 2.2 AA it found nothing, which I wrote down as it was.
 
 ## What was still wrong
 
-It is not live. The first release failed before building, because the account that deploys it needed four roles on the cloud project and only an owner can grant them. When I last checked, the old site was still the one being served.
+It is not live. The first release failed before it could roll out, because the account that deploys it needed four roles on the cloud project and only an owner can grant them. When I last checked, the old site was still the one being served.
 
-The signed-in dashboard also runs on a mock backend, not the real API, so it has not been tested against real accounts. The marketing site is the part I can speak for.
+The signed-in dashboard is a separate part of the project. It runs on a mock backend, not the real API, so it has not been tested against real accounts. The marketing site is the part I can speak for.
 
 I never measured the old site, so I cannot give a before and after against it. The savings above are against my own first version of the rebuild.
 

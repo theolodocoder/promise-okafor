@@ -1,6 +1,6 @@
 ---
 title: Building Paje to understand what frameworks hide
-summary: A close look at the tiny reactive UI runtime I am building, from hyperscript and action dispatch to DOM lifecycle, deliberate constraints, and the lessons hiding beneath familiar abstractions.
+summary: Why I built a small reactive UI runtime in vanilla JavaScript, how its state and rendering work, and what I learned from the parts frameworks usually hide.
 publishedAt: 2026-07-17T09:00:00+01:00
 updatedAt: 2026-07-17T09:00:00+01:00
 category: Engineering notes
@@ -8,11 +8,9 @@ tags: [JavaScript, Runtime Architecture, Virtual DOM, Frontend]
 featured: true
 ---
 
-Frameworks make frontend work feel wonderfully direct. State changes, the view follows, and a large amount of machinery stays out of sight. That convenience is valuable, but after years of shipping products with mature tools, I wanted to inspect the machinery for myself.
+After years of shipping products with mature frameworks, I wanted to see what happens between a state change and the DOM updating. So I built Paje, a small reactive UI runtime written in vanilla JavaScript. It is not an attempt to replace React, Angular, or Vue. It is an exercise in making the hidden parts explicit: how state moves, how actions become updates, how a view becomes DOM, and how every listener and node is cleaned up again.
 
-Paje is the result: a small reactive UI runtime written in vanilla JavaScript. It is not an attempt to replace React, Angular, or Vue. It is a focused engineering exercise in making the hidden contracts of a UI framework explicit: how state moves, how actions become updates, how a view becomes DOM, and how every listener and node is cleaned up again.
-
-> The useful question was never “can I make another framework?” It was “how little machinery is required before a UI starts to feel reactive?”
+> I wanted to find out how little code it takes before a UI starts to feel reactive.
 
 This article walks through the current architecture, the decisions behind it, and the places where keeping the system small forced me to think more clearly.
 
@@ -55,7 +53,7 @@ At its core, Paje is a loop rather than a collection of features.
 4. An after-command handler asks the view for a new virtual tree.
 5. The renderer commits that tree to the DOM.
 
-This separation matters. The dispatcher knows nothing about DOM nodes. Reducers know nothing about event listeners. The renderer knows nothing about why state changed. Each piece has one reason to change, which makes the whole runtime easier to inspect and test.
+This separation matters. The dispatcher knows nothing about DOM nodes. Reducers know nothing about event listeners. The renderer knows nothing about why state changed. Each piece has one reason to change, which makes the runtime easier to inspect.
 
 The dispatcher is a small publish/subscribe system backed by a `Map`. Subscriptions return unsubscribe functions, so ownership and cleanup are part of the design rather than an afterthought.
 
@@ -125,7 +123,7 @@ function renderApp() {
 
 Calling the structure a virtual DOM does not magically make it efficient. The current tree is a DOM description and lifecycle record; it is not yet used for reconciliation.
 
-That constraint is intentional at this stage. Full replacement gives the project a correctness baseline with a very small surface area. Before introducing keys, patch operations, and child reconciliation, I want the lifecycle rules to be unambiguous.
+That constraint is intentional at this stage. Full replacement gives the project a simple baseline with a very small surface area. Before introducing keys, patch operations, and child reconciliation, I want the lifecycle rules to be unambiguous.
 
 The next renderer can then be measured against something concrete:
 
@@ -165,7 +163,7 @@ A tiny runtime is an excellent place for precise error messages. Invalid node ty
 
 ### A more rigorous test matrix
 
-Unit tests cover individual primitives, but renderer confidence comes from behavioral tests: mount, update, reorder, detach, and remount. I would also add leak-focused tests that count listeners and verify cleanup across repeated lifecycle cycles.
+Paje has no real tests yet. The repository holds only a placeholder test, so none of this behavior is checked automatically. Renderer confidence would come from behavioral tests: mount, update, reorder, detach, and remount. I would also add leak-focused tests that count listeners and verify cleanup across repeated lifecycle cycles.
 
 ## What building Paje changed for me
 
@@ -178,11 +176,11 @@ It also reinforced a broader architectural habit: separate mechanism from policy
 - Mounting is a mechanism for creating DOM.
 - Attribute handling is the policy for translating props to the platform.
 
-When those boundaries are visible, a system can grow without turning every new feature into a rewrite.
+Keeping these responsibilities separate gives me clear places to work as I add reconciliation, scheduling and better error messages.
 
 Paje is deliberately small, but the questions it exposes are the same ones that matter in large frontend platforms: identity, ownership, predictability, scheduling, and the cost of abstraction.
 
-That is why I am building it. Not because the frontend world needs another logo, but because understanding the loop makes me better at designing the systems teams depend on every day.
+I am building it because understanding the loop makes me better at working with the frameworks teams depend on every day.
 
 ---
 

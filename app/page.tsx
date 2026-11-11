@@ -56,7 +56,7 @@ export default function HomePage() {
         <div className="grid">{works.map((work, i) => <WorkTile key={work.slug} work={work} wide={i === 0} />)}</div>
       </section>
       <section className="band" id="writings">
-        <div className="head wrap"><h2><span className="up">Writings</span></h2><p>How I make frontend decisions, with the real cases behind them.</p></div>
+        <div className="head wrap"><h2><span className="up">Writings</span></h2><p>Frontend decisions I have made, and what happened after.</p></div>
         <ul className="posts">
           {posts.map((post) => (
             <li key={post.slug}><a href={`/blog/${post.slug}/`}><h3>{post.title}</h3><span>{post.category}</span><span>{formatMonthYear(post.publishedAt)}</span></a></li>

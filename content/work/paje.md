@@ -11,7 +11,7 @@ draft: false
 ---
 ## What it is
 
-Paje is a small UI framework I wrote in plain JavaScript and published on npm. You give it three things: a state object, a view function and a set of reducers. It builds the page from that and rebuilds it when state changes. It has its own virtual DOM, a `h()` function for building elements, an action dispatcher, and mount and unmount that clean up after themselves.
+Paje is a small UI framework I wrote to find out what happens between a state change and an update to the page. It is plain JavaScript, published on npm. You give it three things: a state object, a view function and a set of reducers. It builds the page from them and recreates the whole page after every action. It has its own virtual DOM, a `h()` function for building elements, an action dispatcher, and mount and unmount that remove what they created.
 
 The README gives the bundle as ~6.2KB minified and ~2.1KB gzipped. The source is 496 lines. I wrote a longer walkthrough of the internals in [Building Paje](/blog/building-paje/), so this page is only the decisions.
 
@@ -21,7 +21,7 @@ I had used mature frameworks for years and could not say what they did between "
 
 ## How I worked it out
 
-There was nothing to measure, so I built it in the order the data moves. Hyperscript first, then mounting, then destroying, then the dispatcher, then the state wiring. A counter and a todo app were my test bench. Each one is just a view function, so a mistake in the runtime showed up as a page that was wrong.
+There was nothing to measure, so I built it in this order: hyperscript, mounting, destroying, the dispatcher, then the state wiring. A counter and a todo app were my test bench. Both are view functions, so if the runtime was wrong I could see it in the page.
 
 <figure class="wide">
 <div class="flow">
@@ -35,7 +35,7 @@ There was nothing to measure, so I built it in the order the data moves. Hypersc
 
 ## The hard part
 
-The hard part was cleanup. Creating a node is easy. Knowing who owns it afterwards is what takes care. If a listener or an element outlives the view that made it, the page slowly fills with ghosts.
+The hard part was cleanup. Creating a node is easy. Knowing who owns it afterwards is what takes care. If a listener or an element outlives the view that made it, it stays in the page after the view is gone.
 
 So every virtual node remembers the real node it created and the exact handler functions it attached:
 
@@ -51,7 +51,7 @@ function createElementNode(vdom, parentEl) {
 }
 ```
 
-`removeEventListener` only works with the same function that was added, so destroying a node walks the tree and hands back those saved references. Nothing is searched for and nothing is guessed.
+`removeEventListener` only works with the same function that was added, so destroying a node walks the tree and hands back those saved references. Nothing has to be looked up.
 
 ## Decisions and tradeoffs
 
@@ -94,7 +94,7 @@ function renderApp() {
 }
 ```
 
-The virtual tree is a description and a record of what to clean up. It is not yet used to compare old with new. I did it this way so the lifecycle rules were right before anything cleverer sat on top of them. A diff on top of leaky cleanup would hide the leaks.
+The virtual tree is a description and a record of what to clean up. It is not yet used to compare old with new. I kept rendering this simple while I worked out how nodes and listeners should be created and removed. A diff on top of leaky cleanup would hide the leaks.
 
 > **What it cost**
 > Every action recreates every node, so an input in the todo example is destroyed and rebuilt on each keystroke. It is fine for small apps and wrong for big ones. The README line about "efficient rendering" is generous, and I would not repeat it now.
@@ -111,7 +111,7 @@ Paje is on npm at version 1.0.2, with a counter and a todo app as examples. The 
 
 Looking back through the history with a harder eye, I found things I would not hide.
 
-**Cleanup was incomplete at first.** For the first working version, destroying an element removed its children and its listeners but never the element itself. The fix was three lines:
+**Cleanup was incomplete at first.** For the first working version, destroying an element removed its children and its listeners but never the element itself. The fix was a call to `el.remove()`:
 
 ```javascript
 if (el && el.parentNode) {
@@ -125,4 +125,4 @@ if (el && el.parentNode) {
 
 ## What I took from it
 
-Say what you have not built. Paje is a runtime that rebuilds the page, and the honest label for it is exactly that. The framework work I do now starts from ownership: who creates a thing, and what ends it.
+Paje is a runtime that rebuilds the page, and that is the label I would give it. The cleanup bug taught me to ask, for anything a runtime creates, who removes it.

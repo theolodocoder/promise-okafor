@@ -15,17 +15,19 @@ When someone uploads a resume to JobWhisper, the app reads it in their browser a
 
 It takes PDF, Word and plain text, turns all three into the same simple list of text blocks, and runs one parser over that list. There is no AI model in it. It follows rules, so it behaves the same way every time and a user can predict it and correct it.
 
+The server parses the file first. Then the browser parses it again, and its result replaces the server's when it passes two checks, described below.
+
 I also wrote a small public prototype of a resume parser earlier in the year. It is a separate, older experiment and shares no code with this one.
 
 ## The problem
 
 A PDF does not contain lines, paragraphs or columns. It contains small runs of text, each with a position on the page. Everything you see as structure is a guess from those positions.
 
-The server reads the same file, but it only gets flat text out of it. So on resumes with real layout it merged jobs together, kept page footers as content, and one user's resume showed up as one block of run-on prose. The layout was in the file. It was being thrown away before the parser ever saw it.
+The server reads the same file, but it only gets flat text out of it. So on resumes with real layout it merged jobs together, kept page footers as content, and one user's resume showed up as one block of run-on prose. The positions were in the file. They were being thrown away before the parser ever saw it.
 
 ## Reproducing it with real files
 
-I took nine real resume PDFs, exported from Google Docs, Word and Canva, with one and two columns, and ran them through the exact upload path. All nine parsed badly, and none of them raised an error. Silent failure was the worst part, because nothing told anyone to look.
+I took nine real resume PDFs, exported from Google Docs, Word and Canva, with one and two columns, and ran them through the exact upload path. All nine failed silently. The upload worked, no error appeared, and the data in the editor was wrong. That was the worst part, because nothing told anyone to look.
 
 ## The hard part
 
@@ -33,9 +35,9 @@ Rebuilding a page from loose pieces. Each piece below was a bug I met on a real 
 
 **Spaces.** A PDF can split a line in the middle of a word. "lazy loading" arrived as "lazy lo" and "ading", and joining pieces with a space gave "lazy lo ading". So spaces come from the gap between where one piece ends and the next begins, and a gap of about a third of a space is enough to count.
 
-**Columns.** LinkedIn's export puts a sidebar next to the main text, and the parser took the sidebar's "Contact" heading for the candidate's name. I find columns by looking for the widest empty band in the middle of the page that no text crosses.
+**Columns.** LinkedIn's export puts a sidebar next to the main text, and the parser took the sidebar's "Contact" heading for the candidate's name. I find columns by looking for the widest empty strip down the middle of the page that no text crosses, and I split the page there.
 
-That broke on resumes with right-aligned dates, which also leave a clean gap. Splitting there tears every date from its job. A strip of dates and a sidebar look the same by size, so I tell them apart by content. If at least half the text in the narrow strip contains a year, it is a rail of dates, not a column.
+That broke on resumes with right-aligned dates, which also leave a clean gap. Splitting there tears every date from its job. A strip of dates and a sidebar are the same width, so size cannot tell them apart. I look at what is inside. If at least half the text in the narrow strip contains a year, it is a rail of dates, not a column.
 
 **Bold.** The PDF reader only gives a font's internal name at first. The real name, like Arial-BoldMT, shows up only after a second call. Bold lives in that name and nowhere else, so without it every heading looked plain.
 
@@ -60,7 +62,7 @@ No single signal marks a heading in every resume. Wording, bold, size, capitals,
 > **What it cost**
 > Some unusual custom headings merge into the section above them.
 
-The weights are whole numbers on purpose. Bold at 0.15, larger than body at 0.2 and short at 0.1 add up to 0.44999999999999996, which failed a check against 0.45 and silently dropped a real heading. Whole numbers made the sum exact.
+I use whole-number weights because decimals broke a check. Bold at 0.15, larger than body at 0.2 and short at 0.1 add up to 0.44999999999999996, which failed a check against 0.45 and silently dropped a real heading. Whole numbers made the sum exact.
 
 ### One confidence per section
 
@@ -68,13 +70,13 @@ Each section gets a confidence from 0 to 100, and anything under 60 is flagged f
 
 ### Trust the browser parse only when it passes two gates
 
-After the server stores the file, the browser parses it again. If that parse has a name or an email, at least two sections, and no job with an absurd pile of bullets, it replaces the server's version. If not, the server's version stays. The bar is coarse on purpose. A parse that fails it is worse than nothing.
+After the server stores the file, the browser parses it again. If that parse has a name or an email, at least two sections, and no job with an absurd pile of bullets, it replaces the server's version. If not, the server's version stays. The bar is coarse on purpose, and I would rather keep the server's version than attach a parse that fails it.
 
 ### Keep the heavy libraries out of the first page
 
-The PDF and Word libraries load only when someone uploads. A dynamic import inside an eager module did not do this, because the bundler inlined it. I put each library in a module that nothing imports directly. The Word library alone had added 550 KiB gzip to the first load.
+The PDF and Word libraries load only when someone uploads. A dynamic import inside an eager module did not do this, because the bundler inlined it. I put each library in a module that nothing imports directly. When the Word library was imported the plain way, 550 KiB gzip of it landed in the first load.
 
-The PDF worker is also shut down in a `finally` block. A corrupt or password-protected file fails halfway, and without that every retry left another worker running on the low-end phones and laptops we budget for.
+The PDF worker is also shut down in a `finally` block. A corrupt or password-protected file fails halfway through reading. Without that block, every retry of the bad file left another worker running, on the low-end phones and laptops we budget for.
 
 ### Fix it at the smallest point
 
@@ -94,7 +96,7 @@ The nine real resumes were hardened on the server upload path, in the parser the
 <figcaption>The nine real resumes, before and after. Two of the nine have no bullets to recover. The files themselves are not kept anywhere.</figcaption>
 </figure>
 
-Most of the causes were small. A bullet character the parser did not know made one job with eight bullets into eight jobs. A wrapped email ended in "gmail.co". A two-column export gave the name as "Contact". A bare year became a made-up month.
+The causes were small details with big effects. A bullet character the parser did not know made one job with eight bullets into eight jobs. A wrapped email ended in "gmail.co". A two-column export gave the name as "Contact". A bare year became a made-up month.
 
 ## What a teammate added
 
@@ -108,4 +110,4 @@ I have no production numbers, and no parse-time measurements either.
 
 ## What I took from it
 
-When a parser can fail without an error, the test has to be real files. The nine resumes found more in a day than my own fixtures had. And where the parser cannot be sure, a blank field is better than a confident wrong one.
+When a parser can fail without an error, the test has to be real files. The nine real resumes showed failures that clean test data would not. And where the parser cannot be sure, a blank field is better than a confident wrong one.

@@ -4,7 +4,7 @@ import { formatMonthYear, getAllPosts } from "@/lib/blog";
 import { StructuredData } from "@/components/structured-data";
 import { BLOG_ID, OG_IMAGE, PERSON_ID, SITE_NAME, WEBSITE_ID, absoluteUrl, breadcrumbSchema } from "@/lib/site";
 
-const DESC = "How I make frontend decisions, with the real cases behind them.";
+const DESC = "Frontend decisions I have made, and what happened after.";
 
 export const metadata: Metadata = {
   title: "Writings",

@@ -1,7 +1,7 @@
 export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://promise-okafor.vercel.app").replace(/\/$/, "");
 export const SITE_NAME = "Promise Okafor";
 export const SITE_TITLE = "Promise Okafor, frontend engineer";
-export const SITE_DESCRIPTION = "Frontend engineer in Lagos. I set up frontends that scale and make decisions a team does not have to undo. Web, desktop and mobile.";
+export const SITE_DESCRIPTION = "Frontend engineer in Lagos. I build frontends teams do not have to undo. Web, desktop and mobile.";
 export const OG_IMAGE = "/og-blog.png";
 export const PERSON_ID = `${SITE_URL}/#promise-okafor`;
 export const WEBSITE_ID = `${SITE_URL}/#website`;

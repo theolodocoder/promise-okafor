@@ -1,7 +1,7 @@
 ---
 title: One codebase for every app
-subtitle: Every app looks the same and none can disagree with the backend.
-line: One shared codebase, one set of tokens and one API contract behind every JobWhisper app.
+subtitle: Every app reads the same design values and the same API contract.
+line: Every JobWhisper app uses the same design values and gets its API types from the backend's contract.
 field: Architecture
 year: 2024 to 2026
 backdrop: sky
@@ -14,23 +14,21 @@ draft: false
 
 ## What it is
 
-JobWhisper ran as a web app, an admin console, a marketing site, a desktop app, a browser extension and a mobile app. I set up the frontend so all of them live in one repository and share the same pieces. There is one design system, with browser components and a React Native counterpart. There is one set of design tokens. And the API client is generated from the backend's own contract, so the frontend and the backend cannot quietly disagree.
+I set up one repository for JobWhisper's web app, admin console, marketing site, desktop app, browser extension and mobile app, so they share the same pieces. There is one design system, with browser components and a React Native counterpart, and one set of design tokens. The API types are generated from the backend's own contract, so a mismatch with the backend fails a check instead of reaching a user.
 
 ## The problem
 
-Apps that each own their buttons, their colors and their idea of what the API returns will drift. The drift is slow and nobody sees it. A button is two pixels different on desktop. A field is called one thing in the app and another thing on the server.
+When apps keep their own buttons, colors and API definitions, they drift apart slowly and nobody sees it. A button is two pixels different on desktop. A field is called one thing in the app and another thing on the server.
 
-The second kind is the expensive one. A hand-written type is a promise nobody checks. The compiler agrees with it, so the first person to find out it is wrong is a user who gets an error.
+The API drift is the expensive kind. A hand-written API type can be wrong while the compiler still accepts it, so the first person to find out is a user whose request fails.
 
 ## How I checked it
 
-I did not trust the rules to hold because we agreed on them. We made the repository check them on every merge. One command runs the formatter, the dependency rules, the contract check, a scan for stray colors, the lint, types, tests and builds, and the performance budgets. If any step fails, nothing merges.
-
-So the way I worked was to find a rule I cared about, write the check that fails when it is broken, and only then rely on it.
+I did not trust the rules to hold because we agreed on them. I added checks for the rules we needed to keep, and the repository runs them on every merge. One command runs the formatter, the dependency rules, the contract check, a scan for stray colors, the lint, types, tests and builds, and the performance budgets. If any step fails, nothing merges.
 
 ## The hard part
 
-The hard part was making three different worlds agree: the browser, React Native, and the backend.
+The browser, React Native and the backend each had their own limits, and they all had to agree.
 
 The browser and React Native cannot share components, because React Native does not run DOM elements. They can share values. So the design system is two sets of components on one set of numbers. And the backend lives in another repository with its own release pace, so the frontend needs a copy of its contract that it can check.
 
@@ -50,7 +48,7 @@ The browser and React Native cannot share components, because React Native does 
 
 Every project in the repository carries tags for what it is and where it runs. The rule is that an app depends on features, features on shared UI and data access, and those on plain domain code. Domain code has no React, no browser and no storage in it. A check reads the tags and fails the build on a bad import.
 
-This is what made the mobile app possible. Code that was mixed in with browser views could not be reached from React Native, so we pulled the plain parts out into packages with no browser in them. The browser packages re-export them, so the web app changed nothing.
+This is what made the mobile app possible. Code that was mixed in with browser views could not be reached from React Native, so we pulled the plain parts out into packages with no browser in them. The browser packages re-export them, so the web app could keep importing from the same places.
 
 > **What it cost**
 > Mobile brought an Nx check that wanted project references the mobile typecheck could not accept. Deploys of the web app quietly stopped for a while because of it. I cover that below.
@@ -74,7 +72,7 @@ Early on, the frontend had its own hand-written contract. On the day we switched
 
 I rewrote the identity checks field by field, narrowed the resume check to the fields both sides share, and parked billing, because the backend had no billing endpoints yet. From then on, the generated types come from the contract file and a check fails if the committed types differ from it.
 
-One detail I got right early: the generated types are a `.ts` file, not a `.d.ts`. A hand-written declaration file is not copied into the build output, so consumers saw `any` and the parity tests passed on nothing.
+The generated types also had to be a `.ts` file, not a `.d.ts`. A hand-written declaration file is not copied into the build output, so consumers saw `any` and the parity tests passed on nothing.
 
 ### Copy the generated client in, and say so
 
@@ -89,7 +87,7 @@ A pasted job description over the API's 5,000 character limit made the request f
 
 ## Result
 
-The web app calls the real API for every feature, and the mock server is left for tests and Storybook. The generated types and the vendored client are the only description of the API the frontend uses. A changed endpoint shows up as a type error in the editor, not as a 400 in staging.
+The web app calls the real API for every feature, and the mock server is left for tests and Storybook. The generated types and the vendored client are the only description of the API the frontend uses. When an endpoint changes, the types should now fail in the editor before a 400 shows up in staging.
 
 I have no before-and-after numbers for this one. The result is the failures that did not happen, and I cannot count those honestly.
 
@@ -103,4 +101,4 @@ Mobile also taught us something about the repository itself. After the mobile me
 
 ## What I took from it
 
-A shared rule only holds if a failing build enforces it. Write the check first, and the standard stays in place after the people who set it have moved on.
+The mobile merge showed that a green build only proves the checks you have. Deploys stopped while CI passed, so the new check went in where the failure actually was. The vendored client and the dark palette are the two rules still waiting for theirs.

@@ -13,11 +13,11 @@ parent: jobwhisper
 
 ## What it is
 
-JobWhisper's interview copilot listens to a live interview and shows the candidate an answer while the interviewer is still talking. I led the frontend, and I did the work on this live path on both sides, the app and the server.
+JobWhisper's interview copilot listens to a live interview and shows the candidate an answer while the interviewer is still talking. I led the frontend, and I worked on this live path in both the app and the server.
 
 ## The problem
 
-On a good connection the question shows up as text about half a second after the interviewer stops talking. That is the number everything else is judged against.
+On a good connection the question shows up as text about half a second after the interviewer stops talking. That is the baseline for a good connection.
 
 Customers on weak connections told us the answers came very late, or never came at all. An answer that shows up after the conversation has moved on is no use to anybody.
 
@@ -25,7 +25,7 @@ We had no number for a weak connection. We only had complaints.
 
 ## First, make it fail on my desk
 
-I did not want to guess, so before fixing anything I built a small test rig. It plays two spoken questions with noisy silence between them, the way a real interview sounds, and sends them through a throttle that caps the upload speed.
+Before changing anything, I built a small test rig to reproduce the problem. It plays two spoken questions with noisy silence between them, the way a real interview sounds, and sends them through a throttle that caps the upload speed.
 
 <figure class="wide">
 <div class="flow">
@@ -41,7 +41,7 @@ The first run was worse than the complaints. At 300 kbps the second question too
 
 ## The hard part
 
-It was not one bug. It was three, and each one made the next one worse.
+Three problems combined to make slow connections fail, and each made the next worse.
 
 1. **We were sending everything.** The app sent raw audio, about 520 kbps for each audio source, with the silence included. A call is mostly the other person talking, or nobody talking, and we were uploading all of it.
 2. **Nothing slowed the sender down.** When the line was full the audio just queued up. Every question waited behind the backlog from the one before it. That is why the second question was so much worse than the first.
@@ -55,13 +55,13 @@ It was not one bug. It was three, and each one made the next one worse.
 <figcaption>What goes up the line. Blue is the first question, green is the second, grey is silence. Before, the second question sits behind all the silence in front of it. After, only speech is sent, with one small frame now and then to keep the line open.</figcaption>
 </figure>
 
-Fixing only the first one would have looked like progress, and the server would still have dropped the call.
+Fixing the audio upload alone would still have left the server dropping slow clients.
 
 ## Decisions and tradeoffs
 
 ### Stop sending silence
 
-I added a gate on the audio. It opens when the sound gets louder than a low threshold, and it closes after the speech stops. Two details mattered more than the gate itself.
+I added a gate on the audio. It opens when the sound gets louder than a low threshold, and it closes after the speech stops. It has to keep the start of each word and stay open long enough to close each turn.
 
 <figure class="wide">
 <div class="gate"><i class="off" style="width:20%"></i><i class="pre" style="width:4%"></i><i class="sp" style="width:30%"></i><i class="tail" style="width:22%"></i><i class="off" style="width:24%"></i></div>
@@ -74,7 +74,7 @@ I added a gate on the audio. It opens when the sound gets louder than a low thre
 **The end of the turn.** I first set the tail to 2 seconds. That was wrong. The speech-to-text side decides a person has finished by hearing silence, and that silence window can be set as high as 3 seconds. If my tail is shorter than the window, the turn never closes and no answer comes until somebody speaks again. So I set it to 3.5 seconds, which covers every allowed setting.
 
 > **What it cost**
-> We save nothing in pauses shorter than 3.5 seconds. We still skip the long silences, which is most of a call. In the test, 141 of 316 audio frames were sent, 55% less.
+> Pauses shorter than 3.5 seconds are sent in full. We still skip the long silences, which is most of a call. In the test, 141 of 316 audio frames were sent, 55% less.
 
 I also set the open threshold low on purpose, below every speech detector further down the line. If I am wrong about that, the gate stays open in a noisy room. We save no data, but we lose no words. I chose the failure that wastes data over the one that cuts speech.
 
@@ -95,7 +95,7 @@ When the client's download side backs up, the server now drops the messages that
 
 It never drops heartbeats or state changes. The code review caught that I had made retractions droppable too, which would have left a wrong answer on screen. I fixed it and added a test that fails without the fix.
 
-The same review found this dropping rarely triggers in practice, because the operating system's own buffers hide the backlog from the server. I kept it. It is harmless, and it is right when it does trigger.
+The review also found that the operating system's own buffers hide most backlogs from the server, so this dropping rarely triggers. I kept it, because it only ever drops a message the next one replaces.
 
 ### Slow is not dead
 
@@ -106,11 +106,11 @@ On the server, any message from the client now counts as proof it is alive, not 
 
 ### Screenshots: lower the quality, never the size
 
-The coding copilot reads the candidate's screen. On a weak link it now sends a lighter image, but at full size. The AI reads code from that image and needs every pixel. Blurry is fine. Small is not.
+The coding copilot reads the candidate's screen. On a weak link it now sends a lighter image, but at full size. The AI reads code from that image, so I kept the full size and let only the quality drop.
 
 ### What I chose not to build
 
-A limit that throws away audio older than a few seconds. It is the obvious fix, and I left it out. It could drop the bit of silence that closes a turn, and then there is no answer at all. The gate already drains the backlog in every pause.
+A limit that throws away audio older than a few seconds. It is the obvious fix, and I left it out. It could drop the bit of silence that closes a turn, and then there is no answer at all. The gate already drains the backlog during the pauses.
 
 ## Result
 
@@ -128,14 +128,14 @@ At 150 kbps it went from never arriving to 5.2 seconds. These are the times for 
 </div>
 </figure>
 
-The "before" numbers are kinder than what customers saw. I measured the old app against the fixed server. Against the old server, the second question was dropped even at 300 kbps.
+The "before" numbers are kinder than what customers saw, because I measured the old app against the fixed server. Against the old server, the second question was dropped even at 300 kbps.
 
 ## What was still wrong
 
 At 150 kbps the first question still took 8 seconds. The lag that was left was the speech itself. Raw audio is too heavy for that line even when it is compressed, and no gate fixes that.
 
-That became the next project: a lighter audio format that sends about 16 times less data.
+That became the next project: a lighter audio format that sends about 16 times less data on that link.
 
 ## What I took from it
 
-Build the thing that makes it fail first. Without the throttle I would have guessed "compress it", seen a small win and stopped. The server would still be hanging up on every slow client.
+Without the throttle I would have guessed "compress it", seen a small win and stopped. The server would still be hanging up on every slow client.

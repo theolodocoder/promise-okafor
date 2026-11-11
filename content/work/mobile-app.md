@@ -14,19 +14,19 @@ draft: false
 
 ## What it is
 
-The JobWhisper app for iPhone and Android, built with React Native and Expo. It has the job deck, the application tracker and the live interview copilot. I built it on the same shared code as the web app, after an earlier Flutter version of the app, so the work was a full port of that design plus the real API behind every screen.
+I built this app with React Native and Expo, on the same shared code as the web app. It has the job deck, the application tracker and the live interview copilot. It came after an earlier Flutter version, so the work was a full port of that design plus the real API behind every screen. Two stories run through it, getting past the store reviews and fixing the copilot, and both come down to how we release.
 
-Android went live in the Play Store in the US on 12 October 2026. On iOS, the first version went to TestFlight in September and to App Review in late September. I'll say below what each store did and what I do not know.
+Android went live in the Play Store in the US on 12 October 2026. On iOS, the first version went to TestFlight in September and to App Review in late September.
 
 ## The problem
 
-Everything in the app passed. Unit tests, types, lint, the simulator on my desk and a real iPhone. Then four things failed that none of those could see: Apple's reviewers, a cloud build, a real backend, and a phone on the table in front of an interviewer.
+Our unit tests, types, lint, the simulator on my desk and a real iPhone all passed. Then four things failed that none of those could see: Apple's reviewers, a cloud build, a real backend, and a phone on the table in front of an interviewer.
 
 ## How I found each one
 
-Each failure had a place where it showed up, so the first job was to go to that place.
+I reproduced each failure in the place where it first showed up.
 
-For the launch crash, Apple said only "crashed on launch". Our iPhone ran fine, and so did the simulator. The difference was the iOS version. Apple reviews iPhone-only apps on an iPad, on the newest system. So I made an iPad Air simulator on iPadOS 27 and ran the release build there. It died at once, and the log gave the reason.
+For the launch crash, Apple said only "crashed on launch". Our iPhone ran fine, and so did the simulator. The release build was failing on the newest system, iPadOS 27, because that is where Apple's review ran it: on an iPad, even though the app is iPhone-only. So I made an iPad Air simulator on iPadOS 27 and ran the release build there. It died at once, and the log gave the reason.
 
 <figure class="wide">
 <div class="flow">
@@ -42,11 +42,11 @@ For the two build failures, I ran the cloud build's own commands on my machine u
 
 ## The hard part
 
-Nothing was wrong in a way a test could point at.
+Our tests missed all of it, because each problem only showed up in a different build environment or on a real device.
 
 The launch crash was a new rule in the newest SDK. Apps built with it must use the scene-based life cycle, and ours used the old one. On iOS 26 that only prints a warning, so every device we owned said the app was fine. A build that is safe on every machine you own can still be dead on the one the reviewer owns.
 
-The cloud builds failed because of what my machine had and a clean checkout did not. The copilot was the worst, because it did not crash. It transcribed the first question and then went quiet and hung up.
+The cloud builds failed because of what my machine had and a clean checkout did not. The copilot was the hardest to debug because it did not crash. It stayed connected long enough to transcribe the first question, then went quiet and hung up.
 
 ## Decisions and tradeoffs
 
@@ -61,7 +61,7 @@ I chose the throw on purpose. If the template drifts, a silent skip would ship a
 
 ### Adapt the design system, do not reuse it
 
-The desktop app can use our web components because it is a browser underneath. React Native has no DOM, so those exact components cannot render. I made the native design system a faithful copy of the web one, with the same look and the same props, and rewired the screens to use it. Then I stopped. Switch, Dialog and a few others had no screen that needed them, so I did not port them.
+The desktop app can use our web components because it is a browser underneath. React Native has no DOM, so those exact components cannot render. I rebuilt the design system for React Native with the same look and the same props as the web components, and rewired the screens to use it. I ported only what a screen needed.
 
 ### Make the phone copilot match the web contract
 
@@ -73,7 +73,7 @@ The second was a label. We tagged every audio frame as the candidate. In the soc
 
 ![The copilot on a phone: the question as text, then the answer.](/work/copilot.jpg "sky phone")
 
-I also fixed a wrong belief in the code comments. An earlier note said the transcription error was recoverable. The contract says an error frame is final and an "ended" follows. Patching around it had hidden the real cause.
+I also fixed a wrong note in the code comments. It said the transcription error was recoverable. The contract says an error frame is final and an "ended" follows.
 
 Weeks later I brought the phone onto the same socket layer as web and desktop, and fixed the silence the phone streamed all the time. The pull request says plainly that I had not run it on a device yet.
 
@@ -93,14 +93,14 @@ The launch crash is fixed and the plugin has a test. The consent gate and the ne
 
 Android is live in the US and verified from its public store page. After that I hid the iOS-only billing link on Android and sent a worldwide release to review, with a later release behind it.
 
-On the phone copilot, the two root causes are fixed, and the later weak-network work is merged. I do not have a measured before and after from a real phone, so I will not give one.
+On the phone copilot, the two root causes are fixed, and the later weak-network work is merged. That work stopped the phone streaming audio nonstop while silent. The saving is my calculation, not a measurement. I do not have a measured before and after from a real phone, so I will not give one.
 
 ## What was still wrong
 
 I do not have Apple's answer to the 14 October resubmission in my notes, so I am not claiming the App Store listing. I also do not have Google's answer on the worldwide releases.
 
-The reduced copy problem is fixed only by discipline. Phone, web and desktop share the socket now, but there is no test that fails when the phone drifts from the contract. The motion code is the same kind of gap. Our test setup replaces the animation library, so a bad color value in an animation passed every test and still crashed the app on launch. Only a rebuilt app running on a device caught it.
+The reduced copy problem is only guarded by care when we edit. Phone, web and desktop share the socket now, but there is no test that fails when the phone drifts from the contract. The motion code is the same kind of gap. Our test setup replaces the animation library, so a bad color value in an animation passed every test and still crashed the app on launch. Only a rebuilt app running on a device caught it.
 
 ## What I took from it
 
-Test where the judge tests. Our devices were the wrong ones. The newest iOS on an iPad simulator, a clean checkout for the cloud build and the real backend on a phone each found something we could not find any other way.
+Our test setup did not cover the places that found these problems. The newest iOS on an iPad simulator, a clean checkout for the cloud build and the real backend on a phone each found something we could not find any other way. I would run those three earlier in every release.

@@ -10,8 +10,8 @@ export function Footer() {
     <footer className="foot" id="contact">
       <div className="ask wrap">
         <div>
-          <h2><span className="up">Have a frontend problem that has been hard to <i>solve</i>?</span></h2>
-          <p>Tell me about it. A short call is enough to start, and if I am not the right person I will say so.</p>
+          <h2><span className="up">Working through a hard frontend <i>problem</i>?</span></h2>
+          <p>Tell me what you are working on. A short call is enough to start.</p>
         </div>
         <div className="cta">
           {/* a plain anchor: the booking link is mailto or external, never a Next route */}

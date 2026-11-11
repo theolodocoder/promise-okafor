@@ -37,11 +37,11 @@ That run showed two dead spots, and they had different causes. One was before th
 
 ## The hard part
 
-Nothing here was one big slow thing. It was a line of small waits, each standing behind the one before it.
+The delay was a line of small waits, each standing behind the one before it.
 
 The connection waited for the transcription provider before it opened, so the app sat on "connecting" for up to 2.4 seconds. The answer waited for the whole model reply before showing a character. The model spent its first words repeating the question back, which nobody was waiting for. And the answer itself waited for the final transcript, even though the question was already clear from the first few words.
 
-Each wait looked fair on its own. Together they were the 3.8 seconds.
+Each step waited for the one before to finish, so together they added up to the 3.8 seconds.
 
 ## Decisions and tradeoffs
 
@@ -58,7 +58,7 @@ Socket open went from 1.6 to 2.4 seconds to about 0.65 seconds in testing.
 
 ### Stream the answer, and replace instead of append
 
-The server now sends the answer as it is written. Each message carries the whole text so far, and the newest one replaces the last. I chose replace over append because a message can arrive late or be skipped, and a replace never leaves a gap or a doubled word. It also lets the server throttle the stream and drop a message, and it is never replayed after a reconnect. The finished answer still arrives as before, so an old app that ignores the stream stays correct.
+The server now sends the answer as it is written. Each message carries the whole text so far, and the newest one replaces the last. I chose replace over append because a message can arrive late or be skipped, and a late or skipped message then cannot leave a gap or a doubled word. It also lets the server throttle the stream and drop a message. The finished answer still arrives as before, so an old app that ignores the stream still gets it.
 
 If the model declines to answer, nothing is shown. If it starts and then breaks, the server sends an empty message that takes the text back.
 
@@ -66,20 +66,20 @@ First text on screen came down from 3.8 to 2.1 seconds, in testing.
 
 ### Put the answer field first
 
-The model returns its reply as structured data, and it writes the fields in the order we list them. We listed the question first, so it spent its first words restating the question, and the app cannot show a character until it has seen where the answer begins. I put the answer field first and read it while it was still half written. Measured one character at a time, the first visible text now appeared after 12 characters of reply, down from 43, in testing.
+The model returns its reply as structured data, and it writes the fields in the order we list them. We listed the question first, so it spent its first words restating the question, and the app cannot show a character until it has seen where the answer begins. I put the answer field first and read it while it was still half written. The first visible text now appeared after 12 characters of reply instead of 43, in testing.
 
-### Start on the first question-like partial
+### Start answering before the final transcript
 
-My first version started answering when the interviewer went silent. I measured it against the real provider and it did nothing. The provider only sends its partial transcripts after its own silence detector has already decided the turn is over, so there was no partial to start from. I wrote that down in the commit as a lever that shipped inert, and moved the start to the first partial of five or more words that looks like a question.
+My first version started answering when the interviewer went silent. I measured it against the real provider and it did nothing. The provider only sends its partial transcripts after its own silence detector has already decided the turn is over, so there was no partial to start from. I wrote that down in the commit as a lever that shipped inert, and moved the start to the first partial transcript of five or more words that looks like a question.
 
 > **What it cost**
-> The model may answer the gist of a partial whose final text differs a little. That is the price of starting early. To keep it safe, no part of an answer is ever shown before the question it belongs to, and the answer is labelled with the final transcript, not the guess.
+> The model may answer the gist of a partial whose final text differs a little. That is the price of starting early. To keep it safe, the server holds back any answer text until the question it belongs to has been sent, and the answer is labelled with the final transcript, not the guess.
 
-Measured live, the model sometimes declined short prefixes and the turn was marked answered, so no card ever came. I fixed that so a decline asks again when the finished question arrives.
+Measured live, the model sometimes declined an early partial, but the turn was still marked as answered, so no answer ever appeared. I fixed that so a decline asks again when the finished question arrives.
 
 ### Tune the silence window
 
-The wait for silence turned out to be about a third of the time to the first words. I shortened the window to 400 ms. A shorter one, 300, chopped sentences at breaths, and 400 is the shortest that still closes on a real pause. It stays a setting, so each environment can change it.
+The wait for silence turned out to be about a third of the time to the first words. I shortened the window to 400 ms. A shorter one, 300, chopped sentences at breaths in my test calls, and 400 was the shortest that still closed on a real pause. It stays a setting, so each environment can change it.
 
 I also gave the live answer its own model setting, so that one call can be tuned without moving the cheaper checks beside it.
 
@@ -94,13 +94,20 @@ I also gave the live answer its own model setting, so that one call can be tuned
 <figcaption>Measured locally with spoken test questions, two runs each for the last step. Not production numbers.</figcaption>
 </figure>
 
-In those local runs the first words showed about one second after the interviewer stopped, from 3.8 seconds of empty screen. On the way, the first text was at 2.1 seconds after the connection and streaming changes, and about 1 second after the last two. In a later local end-to-end run with a spoken question, the final transcript took 0.47 seconds, the first answered words 1.5 seconds and the full answer 2.2 seconds. So the number depends on the run and the clock you hold, and I kept the same clock for each comparison.
+In those local runs the first words showed about one second after the interviewer stopped, from 3.8 seconds of empty screen. The numbers come from different runs:
+
+- 3.8 seconds: where I started, from the end of the question to the first text.
+- 2.1 seconds: after the connection and streaming changes.
+- About 1 second: after the last two changes.
+- 1.5 seconds: the first answered words in a later end-to-end run with a spoken question. In that run the final transcript took 0.47 seconds and the full answer 2.2 seconds.
+
+The clock differs a little between runs, so I only compared numbers measured the same way.
 
 ## What was still wrong
 
-These are local runs on a good connection. I had no baseline for real customers, and a slow line was a different problem that I took on next in a separate study. Speculation also still guesses, and I had no count of how often it guessed wrong.
+These are local runs with no throttling. I had no baseline for real customers, and a slow line was a different problem that I took on next, in the weak networks case study. Speculation also still guesses, and I had no count of how often it guessed wrong.
 
-So I built per-question timing next: the server and the app each time their half, the two halves merge into one row of numbers with no transcript text, and an admin page shows the middle and slow end by country, app version and connection. I also built a repeatable throttled test harness, so the next change would be judged against numbers.
+So I added per-question timing, so the next change would be judged against numbers. The server and the app each time their half, and the two merge into one row with no transcript text. An admin page shows the middle and slow end by country, app version and connection. I also built a repeatable throttled test harness.
 
 ## What I took from it
 

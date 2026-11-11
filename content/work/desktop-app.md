@@ -22,11 +22,11 @@ A release pipeline and an update path already existed when I took it over, and a
 
 A web app is one copy, and you can fix it any time. A desktop app is copies on other people's laptops, and some of those copies are in the middle of an interview.
 
-That gives you two rules. An update must never land during a call, and the audio must keep working on machines you do not own. Both rules got tested by real testers in the first weeks.
+So an update must not interrupt a call, and the audio must keep working on machines I do not own. Real testers tested both in the first weeks.
 
 ## How I tracked the audio bugs down
 
-Every audio bug had the same shape. It worked on my machine and failed on someone else's, with no error on screen. So I worked from the cause before I touched the app, and on Windows I built a small setup that showed the failure by itself.
+The audio bugs worked on my machine and failed on testers' machines, with no error on screen. I looked for the cause before changing the app, and on Windows I built a small test setup to reproduce the failure.
 
 On the Mac, testers saw "Screen Recording is off" with the switch plainly on, and they heard nothing. I read how macOS handles this audio. The old capture method needs a second permission that is listed on its own, and macOS never asks for it. If it is denied, the capture still starts and just streams silence. So the app was working and hearing nothing, and our screen sent people to a switch that was already on.
 
@@ -34,7 +34,7 @@ On Windows, system audio failed in every release from 1.0.9, and the Mac never s
 
 ## The hard part
 
-Both bugs were quiet. Nothing crashed and nothing printed an error. The Windows one also hid behind the Mac, because the two platforms capture system audio in two different ways, so a fix and a test on the Mac said nothing about Windows.
+The Mac and Windows failures needed separate investigations. The two platforms capture system audio in two different ways, so a fix and a test on the Mac said nothing about Windows.
 
 <figure class="wide">
 <div class="flow">
@@ -57,17 +57,17 @@ The app checks for updates 10 seconds after the window opens, and downloads in t
 
 ### One tag is the whole release
 
-A tag starts the build for each platform. Each one publishes into a single draft release, and a last step checks that all three update files arrived before the draft goes public. If one platform fails, nothing half-ships. If just one platform fails, I can rebuild only that one.
+Each release tag builds all three platforms and publishes their files into one draft release. A last step checks that all three update files arrived before the draft goes public. If one platform fails, the draft stays unpublished and I can rebuild only that one.
 
-Other people fixed parts of the signing with me. Only the Mac build is signed and notarized, with an App Store Connect key, and a release tag refuses to publish an unsigned Mac build. An unsigned Mac app installs, but it can never update itself, so it is not worth publishing.
+Other people fixed parts of the signing with me. Only the Mac build is signed and notarized, with an App Store Connect key, and a release tag refuses to publish an unsigned Mac build.
 
 ### Use the permission people already give
 
-The second Mac permission is one macOS never asks for, so we could not guide people through it. I replaced the capture method instead. I ported a small Swift helper, already in use in sister products, that captures system audio through Screen Recording, which people already turn on for the coding copilot. It runs as a separate program next to the app, one build for each kind of Mac chip. When the permission is refused, it reports it in the system's own words.
+The second Mac permission is one macOS never asks for, so we could not guide people through it. I replaced the capture method instead. I ported a small Swift helper, already in use in sister products, that captures system audio through Screen Recording, a permission people already turn on for the coding copilot. It runs as a separate program next to the app, one build for each kind of Mac chip. When the permission is refused, it says so instead of streaming silence.
 
 ### Make audio fix itself
 
-A tester's real interview hit a network glitch. Afterwards both system audio and the microphone were dead, and the app told them to restart the session, for devices it could have simply started again.
+During a tester's real interview, a network glitch left both system audio and the microphone dead. The app told them to restart the session, for devices it could have simply started again.
 
 Now the helper retries after 2, 5, 15 and 30 seconds. The ladder resets only after a calm minute, so a helper that keeps failing backs off and does not start in a loop. The microphone comes back when the system says a device changed, like AirPods dropping or a USB mic being pulled.
 
@@ -82,7 +82,7 @@ Meeting detection only looked at running programs. So Google Meet in Chrome was 
 
 The Windows system audio fix went out in release 1.0.13. The audio had been broken for four releases in a row, 1.0.9 to 1.0.12. In my test app, the request went from refused to one audio track and one video track with frames flowing.
 
-On the Mac, the helper replaced the old capture and works with the one permission people already give. Meeting detection was tested on a real Mac, and a browser meeting opened the meeting setup. Updates now only happen outside a call.
+On the Mac, the helper replaced the old capture and works with the one permission people already give. Meeting detection was tested on a real Mac, and a browser meeting opened the meeting setup. The app no longer checks for or downloads an update during a call.
 
 ## What was still wrong
 
@@ -90,4 +90,4 @@ I could not run the Windows fix on a Windows machine when I merged it, so the te
 
 ## What I took from it
 
-A bug you cannot see on your own machine needs its cause found before its fix. On Windows, a bare test app showed the real cause in one run, where guessing from the Mac would have told me nothing.
+The Windows fix needed its own test app, because a passing test on the Mac could not tell me whether Windows audio worked. The bare app showed the real cause in one run.
